@@ -1,44 +1,16 @@
 [Unit]
-Description=Cloudflare DNS Manager Telegram Bot
-Documentation=https://github.com/yourusername/cloudflare-dns-bot
-After=network.target network-online.target
-Wants=network-online.target
+Description=Cloudflare DNS Manager Bot
+After=network.target
 
 [Service]
-Type=forking
+Type=simple
 User=root
-Group=root
 WorkingDirectory=/workspace
-ExecStart=/workspace/start_bot.sh start
-ExecStop=/workspace/start_bot.sh stop
-ExecReload=/workspace/start_bot.sh restart
-PIDFile=/workspace/bot.pid
-
-# Restart configuration
+ExecStart=/workspace/venv/bin/python /workspace/Main.py
 Restart=always
-RestartSec=10
-StartLimitInterval=60
-StartLimitBurst=3
+RestartSec=5
 
-# Environment
-Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-Environment=PYTHONPATH=/workspace
 Environment=PYTHONUNBUFFERED=1
-
-# Security settings
-NoNewPrivileges=true
-PrivateTmp=true
-ProtectSystem=strict
-ReadWritePaths=/workspace
-
-# Logging
-StandardOutput=journal
-StandardError=journal
-SyslogIdentifier=cloudflare-dns-bot
-
-# Resource limits
-MemoryLimit=512M
-CPUQuota=80%
 
 [Install]
 WantedBy=multi-user.target
