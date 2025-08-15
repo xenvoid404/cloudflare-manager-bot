@@ -57,7 +57,7 @@ class Messages:
         LOADING = (
             f"{Emojis.LOADING} Memproses permintaan Anda...\nMohon tunggu sebentar."
         )
-        SUCCESS = f"{Emojis.SUCCESS} Operasi berhasil dilakukan!"
+        SUCCESS = f"{Emojis.SUCCESS} Operasi berhasil dilakukan\\!"
         CANCELLED = f"{Emojis.ERROR} Operasi dibatalkan."
 
     class Start:
@@ -117,7 +117,7 @@ Silakan tambahkan akun Cloudflare Anda untuk memulai mengelola DNS\\.
 File JSON berisi semua DNS records dengan format yang rapi.
         """.format(title=VIEW_TITLE, emoji_zone=Emojis.ZONE, emoji_export=Emojis.EXPORT)
 
-        NO_RECORDS = f"*{Emojis.VIEW_RECORDS} DNS Records*\n\nTidak ada DNS records ditemukan di zone ini.\n\nGunakan /menu untuk kembali ke menu utama."
+        NO_RECORDS = f"*{Emojis.VIEW_RECORDS} DNS Records*\n\nTidak ada DNS records ditemukan di zone ini\\.\n\nGunakan /menu untuk kembali ke menu utama\\."
 
         FETCH_ERROR = f"""
 {Emojis.ERROR} Gagal mengambil DNS records.
@@ -150,21 +150,21 @@ Pilih cara {operation} record DNS:
 Saya akan memandu Anda untuk menambahkan akun Cloudflare\\.
 
 {Emojis.EMAIL} *Langkah 1/3*
-Silakan masukkan email Cloudflare Anda\\:
+Silakan masukkan email Cloudflare Anda:
         """
 
         EMAIL_SUCCESS = f"""
 {Emojis.SUCCESS} Email berhasil disimpan\\!
 
 {Emojis.KEY} *Langkah 2/3*
-Silakan masukkan Global API Key Cloudflare Anda\\:
+Silakan masukkan Global API Key Cloudflare Anda:
 
-_API Key dapat ditemukan di\\:_
+_API Key dapat ditemukan di:_
 My Profile → API Tokens → Global API Key → View
         """
 
         API_KEY_SUCCESS = f"""
-{Emojis.SUCCESS} API Key berhasil disimpan!
+{Emojis.SUCCESS} API Key berhasil disimpan\\!
 
 {Emojis.ID} *Langkah 3/3*
 Silakan masukkan Account ID Cloudflare Anda:
@@ -176,29 +176,29 @@ Dashboard → Right sidebar → Account ID
         VERIFYING = f"{Emojis.LOADING} Memverifikasi kredensial dan mengambil daftar zone...\nMohon tunggu sebentar..."
 
         VERIFICATION_FAILED = f"""
-{Emojis.ERROR} Gagal mengambil daftar zone. Kemungkinan penyebab:
+{Emojis.ERROR} Gagal mengambil daftar zone\\. Kemungkinan penyebab:
 • Email, API Key, atau Account ID tidak valid
 • Tidak ada zone di akun Cloudflare
 • Masalah koneksi internet
 
-Gunakan /menu untuk mencoba lagi.
+Gunakan /menu untuk mencoba lagi\\.
         """
 
-        ZONES_FOUND = f"{Emojis.SUCCESS} Berhasil terhubung ke Cloudflare!\n\n{Emojis.MENU} *Ditemukan {{count}} zone:*\nSilakan pilih zone yang ingin dikelola:"
+        ZONES_FOUND = f"{Emojis.SUCCESS} Berhasil terhubung ke Cloudflare\\!\n\n{Emojis.MENU} *Ditemukan {{count}} zone:*\nSilakan pilih zone yang ingin dikelola:"
 
         ACCOUNT_SAVED = f"""
-{Emojis.SUCCESS} *Akun Cloudflare berhasil ditambahkan!*
+{Emojis.SUCCESS} *Akun Cloudflare berhasil ditambahkan\\!*
 
 {Emojis.EMAIL} *Email:* `{{email}}`
 {Emojis.ZONE} *Zone:* `{{zone_name}}`
 
-Sekarang Anda dapat mengelola DNS record.
+Sekarang Anda dapat mengelola DNS record\\.
 Gunakan /menu untuk mengakses fitur-fitur yang tersedia.
         """
 
-        SAVE_FAILED = f"{Emojis.ERROR} Gagal menyimpan akun ke database. Silakan coba lagi.\n\nGunakan /menu untuk mencoba lagi."
+        SAVE_FAILED = f"{Emojis.ERROR} Gagal menyimpan akun ke database\\. Silakan coba lagi\\.\n\nGunakan /menu untuk mencoba lagi\\."
 
-        CANCELLED = f"{Emojis.ERROR} Penambahan akun Cloudflare dibatalkan.\n\nGunakan /menu untuk kembali ke menu utama."
+        CANCELLED = f"{Emojis.ERROR} Penambahan akun Cloudflare dibatalkan\\.\n\nGunakan /menu untuk kembali ke menu utama\\."
 
     class Help:
         CONTENT = f"""
