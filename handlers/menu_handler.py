@@ -35,13 +35,12 @@ async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
                     ),
                 ],
                 [
-                    InlineKeyboardButton("♻️ Edit Record", callback_data="edit_record"),
+                    InlineKeyboardButton("♻️ Edit Record", callback_data="edit_records"),
                     InlineKeyboardButton(
-                        "🗑️ Hapus Record", callback_data="remove_record"
+                        "🗑️ Hapus Record", callback_data="remove_records"
                     ),
                 ],
                 [InlineKeyboardButton("⚙️ Others Menu", callback_data="others_menu")],
-                [InlineKeyboardButton("❓ Bantuan", callback_data="help")],
             ]
 
             # Hide API Key for security (show only first and last 4 characters)
@@ -53,12 +52,12 @@ async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
             text = (
                 "*🌐 CLOUDFLARE DNS MANAGER*\n"
-                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━\n"
                 f"👤 *Nama:* `{user.first_name or 'N/A'}`\n"
                 f"📧 *Email:* `{account.get('email', 'N/A')}`\n"
                 f"🔑 *API Key:* {api_key_hidden}\n"
                 f"🌍 *Zone:* `{account.get('zone_name', 'N/A')}`\n"
-                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━\n"
                 "Pilih menu di bawah untuk mengelola DNS Anda\\."
             )
         else:
@@ -66,18 +65,17 @@ async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             keyboard = [
                 [
                     InlineKeyboardButton(
-                        "➕ Tambah Akun Cloudflare", callback_data="add_cf_account"
+                        "➕ Tambah Akun Cloudflare", callback_data="add_cloudflare"
                     )
                 ],
-                [InlineKeyboardButton("❓ Bantuan", callback_data="help")],
             ]
 
             text = (
                 "*🌐 CLOUDFLARE DNS MANAGER*\n"
-                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━\n"
                 f"👤 *Nama:* `{user.first_name or 'N/A'}`\n"
                 "📱 *Status:* `Belum ada akun terdaftar`\n"
-                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━\n"
                 "Silakan tambahkan akun Cloudflare Anda untuk memulai mengelola DNS\\."
             )
 
@@ -85,8 +83,6 @@ async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         await update.message.reply_text(
             text, parse_mode=ParseMode.MARKDOWN_V2, reply_markup=reply_markup
         )
-
-        logger.info(f"Menu displayed for user {user.id}")
 
     except Exception as e:
         logger.error(f"Error in menu command for user {update.effective_user.id}: {e}")
@@ -106,135 +102,11 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
         logger.info(f"User {user.id} clicked: {callback_data}")
 
-        if callback_data == "add_cf_account":
-            await query.edit_message_text(
-                text="🚧 *Tambah Akun Cloudflare*\n\n"
-                "Fitur ini sedang dalam pengembangan\\.\n"
-                "Akan memungkinkan Anda menambahkan:\n"
-                "• Email Cloudflare\n"
-                "• API Key\n"
-                "• Zone ID\n\n"
-                "Gunakan /menu untuk kembali ke menu utama\\.",
-                parse_mode=ParseMode.MARKDOWN_V2,
-            )
-
-        elif callback_data == "get_records":
-            await query.edit_message_text(
-                text="🚧 *Fitur Lihat Record DNS*\n\n"
-                "Fitur ini sedang dalam pengembangan\\.\n"
-                "Akan menampilkan semua record DNS yang ada di zone Anda\\.\n\n"
-                "Gunakan /menu untuk kembali ke menu utama\\.",
-                parse_mode=ParseMode.MARKDOWN_V2,
-            )
-
-        elif callback_data == "add_records":
-            keyboard = [
-                [
-                    InlineKeyboardButton(
-                        "Single Record", callback_data="add_single_record"
-                    ),
-                    InlineKeyboardButton(
-                        "From File", callback_data="add_record_from_file"
-                    ),
-                ],
-                [
-                    InlineKeyboardButton(
-                        "Back To Main Menu", callback_data="back_to_main_menu"
-                    )
-                ],
-            ]
-
-            await query.edit_message_text(
-                text="*Tambah Record DNS*\n\n"
-                "1. *Single Record*: Tambah satu DNS Record baru\\.\n"
-                "2. *From File*: Tambah banyak DNS Record dari file JSON\\.",
-                parse_mode=ParseMode.MARKDOWN_V2,
-                reply_markup=InlineKeyboardMarkup(keyboard),
-            )
-
-        elif callback_data == "edit_records":
-            keyboard = [
-                [
-                    InlineKeyboardButton(
-                        "Single Record", callback_data="edit_single_record"
-                    ),
-                    InlineKeyboardButton(
-                        "From File", callback_data="edit_record_from_file"
-                    ),
-                ],
-                [
-                    InlineKeyboardButton(
-                        "Back To Main Menu", callback_data="back_to_main_menu"
-                    )
-                ],
-            ]
-
-            await query.edit_message_text(
-                text="*Edit Record DNS*\n\n"
-                "1. *Single Record*: Edit satu DNS Record baru\\.\n"
-                "2. *From File*: Edit banyak DNS Record dari file JSON\\.",
-                parse_mode=ParseMode.MARKDOWN_V2,
-                reply_markup=InlineKeyboardMarkup(keyboard),
-            )
-
-        elif callback_data == "remove_record":
-            keyboard = [
-                [
-                    InlineKeyboardButton(
-                        "Single Record", callback_data="remove_single_record"
-                    ),
-                    InlineKeyboardButton(
-                        "From File", callback_data="remove_record_from_file"
-                    ),
-                ],
-                [
-                    InlineKeyboardButton(
-                        "Back To Main Menu", callback_data="back_to_main_menu"
-                    )
-                ],
-            ]
-
-            await query.edit_message_text(
-                text="*Hapus Record DNS*\n\n"
-                "1. *Single Record*: Hapus satu DNS Record baru\\.\n"
-                "2. *From File*: Hapus banyak DNS Record dari file JSON\\.",
-                parse_mode=ParseMode.MARKDOWN_V2,
-                reply_markup=InlineKeyboardMarkup(keyboard),
-            )
-
-        elif callback_data == "others_menu":
-            await query.edit_message_text(
-                text="🚧 *Menu Lainnya*\n\n"
-                "Fitur ini sedang dalam pengembangan\\.\n\n"
-                "Gunakan /menu untuk kembali ke menu utama\\.",
-                parse_mode=ParseMode.MARKDOWN_V2,
-            )
-
-        elif callback_data == "help":
-            help_text = (
-                "*📖 Bantuan Cloudflare DNS Manager*\n\n"
-                "*Fitur yang tersedia:*\n"
-                "• 📝 Tambah Record \\- Menambah record DNS baru\n"
-                "• 📋 Lihat Record \\- Melihat semua record DNS\n"
-                "• ⚙️ Edit Akun \\- Mengubah informasi akun\n"
-                "• 🗑️ Hapus Akun \\- Menghapus akun dari bot\n\n"
-                "*Perintah:*\n"
-                "• /start \\- Memulai bot\n"
-                "• /menu \\- Menu utama\n"
-                "• /help \\- Bantuan\n\n"
-                "Gunakan /menu untuk kembali ke menu utama\\."
-            )
-
-            await query.edit_message_text(
-                text=help_text, parse_mode=ParseMode.MARKDOWN_V2
-            )
-
-        else:
-            await query.edit_message_text(
-                text=f"⚠️ Aksi tidak dikenal: {callback_data}\n\n"
-                "Gunakan /menu untuk kembali ke menu utama\\.",
-                parse_mode=ParseMode.MARKDOWN_V2,
-            )
+        await query.edit_message_text(
+            text=f"⚠️ Aksi tidak dikenal: {callback_data}\n\n"
+            "Gunakan /menu untuk kembali ke menu utama\\.",
+            parse_mode=ParseMode.MARKDOWN_V2,
+        )
 
     except Exception as e:
         logger.error(f"Error in menu callback for user {update.effective_user.id}: {e}")
@@ -251,5 +123,8 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
 menu_handlers = [
     CommandHandler("menu", menu_command),
-    CallbackQueryHandler(menu_callback),
+    CallbackQueryHandler(
+        menu_callback,
+        pattern="^(?!add_cloudflare|get_records|add_records|edit_records|remove_records|others_menu|back_to_main_menu|switch_zone|help_menu).*$",
+    ),
 ]
