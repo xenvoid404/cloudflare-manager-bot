@@ -14,10 +14,10 @@ logger = logging.getLogger(__name__)
 @handle_errors
 @log_user_action("start_command")
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle the /start command with improved user experience."""
+    """Handle command /start dengan pengalaman user yang lebih baik."""
     user = update.effective_user
 
-    # Save user information to database
+    # Simpan informasi user ke database
     user_data = {
         "chat_id": user.id,
         "username": user.username,
@@ -31,7 +31,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         await send_response(update, Messages.Start.SAVE_ERROR)
         return
 
-    # Create welcome message with user's name
+    # Buat pesan selamat datang dengan nama user
     welcome_msg = safe_format_message(
         Messages.Start.WELCOME, name=get_user_display_name(user)
     )

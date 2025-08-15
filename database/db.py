@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class DatabaseManager:
     """
-    Database manager for handling SQLite connections with proper async support.
+    Database manager untuk menangani koneksi SQLite dengan dukungan async yang tepat.
     """
 
     def __init__(self, db_file: str = DATABASE_FILE):
@@ -19,23 +19,23 @@ class DatabaseManager:
         self._ensure_directory()
 
     def _ensure_directory(self) -> None:
-        """Ensure database directory exists."""
+        """Pastikan direktori database ada."""
         os.makedirs(os.path.dirname(self.db_file), exist_ok=True)
 
     def get_connection(self) -> sqlite3.Connection:
-        """Get database connection with proper row factory."""
+        """Dapatkan koneksi database dengan row factory yang tepat."""
         conn = sqlite3.connect(self.db_file, timeout=30.0)
         conn.row_factory = sqlite3.Row
-        # Enable foreign key constraints
+        # Aktifkan foreign key constraints
         conn.execute("PRAGMA foreign_keys = ON")
         return conn
 
     @asynccontextmanager
     async def get_async_connection(self) -> AsyncGenerator[sqlite3.Connection, None]:
-        """Get async database connection using context manager."""
+        """Dapatkan koneksi database async menggunakan context manager."""
         conn = None
         try:
-            # Run database operations in thread pool to avoid blocking
+            # Jalankan operasi database di thread pool untuk menghindari blocking
             loop = asyncio.get_event_loop()
             conn = await loop.run_in_executor(None, self.get_connection)
             yield conn
@@ -58,17 +58,17 @@ class DatabaseManager:
         commit: bool = True,
     ) -> Optional[sqlite3.Row]:
         """
-        Execute database query with proper async handling.
+        Jalankan query database dengan penanganan async yang tepat.
 
         Args:
-            query: SQL query to execute
-            params: Query parameters
+            query: SQL query yang akan dijalankan
+            params: Parameter query
             fetch_one: Return single row
             fetch_all: Return all rows
             commit: Auto-commit transaction
 
         Returns:
-            Query result or None
+            Hasil query atau None
         """
         async with self.get_async_connection() as conn:
             loop = asyncio.get_event_loop()
@@ -88,10 +88,10 @@ class DatabaseManager:
             return result
 
     async def init_database(self) -> None:
-        """Initialize database with required tables."""
-        logger.info(f"Initializing database at: {self.db_file}")
+        """Inisialisasi database dengan tabel yang diperlukan."""
+        logger.info(f"Inisialisasi database di: {self.db_file}")
 
-        # Users table
+        # Tabel users
         users_table = """
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -104,7 +104,7 @@ class DatabaseManager:
         );
         """
 
-        # Cloudflare accounts table
+        # Tabel Cloudflare accounts
         cf_accounts_table = """
         CREATE TABLE IF NOT EXISTS cf_accounts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -121,7 +121,7 @@ class DatabaseManager:
         );
         """
 
-        # Create indexes for better performance
+        # Buat index untuk performa yang lebih baik
         indexes = [
             "CREATE INDEX IF NOT EXISTS idx_users_chat_id ON users(chat_id);",
             "CREATE INDEX IF NOT EXISTS idx_cf_accounts_user_id ON cf_accounts(user_id);",
@@ -129,18 +129,18 @@ class DatabaseManager:
         ]
 
         try:
-            # Create tables
+            # Buat tabel
             await self.execute_query(users_table)
             await self.execute_query(cf_accounts_table)
 
-            # Create indexes
+            # Buat index
             for index_query in indexes:
                 await self.execute_query(index_query)
 
-            logger.info("Database initialized successfully")
+            logger.info("Database berhasil diinisialisasi")
 
         except Exception as e:
-            logger.error(f"Failed to initialize database: {e}")
+            logger.error(f"Gagal menginisialisasi database: {e}")
             raise
 
 
@@ -150,10 +150,10 @@ db_manager = DatabaseManager()
 
 # Legacy compatibility functions
 def get_db_connection() -> sqlite3.Connection:
-    """Legacy function for backward compatibility."""
+    """Fungsi legacy untuk backward compatibility."""
     return db_manager.get_connection()
 
 
 async def init_db() -> None:
-    """Initialize database (async version)."""
+    """Inisialisasi database (versi async)."""
     await db_manager.init_database()

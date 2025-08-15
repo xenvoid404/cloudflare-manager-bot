@@ -1,72 +1,25 @@
 """
-Constants for the Cloudflare DNS Manager Bot.
-Centralizes all messages, emojis, and configuration constants.
+Constants untuk Cloudflare DNS Manager Bot.
+Mengumpulkan semua pesan dan konfigurasi constants.
 """
-
-
-# ========== EMOJIS ==========
-class Emojis:
-    # General
-    WAVE = "👋"
-    WARNING = "⚠️"
-    ERROR = "❌"
-    SUCCESS = "✅"
-    LOADING = "🔄"
-    CONSTRUCTION = "🚧"
-
-    # Menu and Navigation
-    MENU = "📋"
-    BACK = "🔙"
-    HOME = "🏠"
-    SETTINGS = "⚙️"
-    HELP = "📖"
-
-    # DNS Operations
-    VIEW_RECORDS = "📋"
-    ADD_RECORD = "📝"
-    EDIT_RECORD = "♻️"
-    DELETE_RECORD = "🗑️"
-
-    # Cloudflare
-    CLOUDFLARE = "🌐"
-    KEY = "🔑"
-    EMAIL = "📧"
-    ID = "🆔"
-    ZONE = "🌍"
-
-    # File Operations
-    FILE = "📁"
-    EXPORT = "📊"
-    IMPORT = "📥"
-
-    # Status
-    LOCKED = "🔒"
-    UNLOCKED = "🔓"
-    ACTIVE = "🟢"
-    INACTIVE = "🔴"
-
 
 # ========== MESSAGES ==========
 class Messages:
     class Common:
-        UNAUTHORIZED = f"{Emojis.WARNING} Silakan jalankan /start terlebih dahulu untuk menggunakan bot ini."
-        NO_ACCOUNT = f"{Emojis.WARNING} Anda belum menambahkan akun Cloudflare. Gunakan /menu dan pilih 'Tambah Akun Cloudflare'."
-        ERROR_GENERIC = (
-            f"{Emojis.ERROR} Terjadi kesalahan. Gunakan /menu untuk mencoba lagi."
-        )
-        LOADING = (
-            f"{Emojis.LOADING} Memproses permintaan Anda...\nMohon tunggu sebentar."
-        )
-        SUCCESS = f"{Emojis.SUCCESS} Operasi berhasil dilakukan!"
-        CANCELLED = f"{Emojis.ERROR} Operasi dibatalkan."
+        UNAUTHORIZED = "Silakan jalankan /start terlebih dahulu untuk menggunakan bot ini."
+        NO_ACCOUNT = "Anda belum menambahkan akun Cloudflare. Gunakan /menu dan pilih 'Tambah Akun Cloudflare'."
+        ERROR_GENERIC = "Terjadi kesalahan. Gunakan /menu untuk mencoba lagi."
+        LOADING = "Memproses permintaan Anda...\nMohon tunggu sebentar."
+        SUCCESS = "Operasi berhasil dilakukan!"
+        CANCELLED = "Operasi dibatalkan."
 
     class Start:
         WELCOME = """
-{emoji_wave} Halo *{{name}}*\\! Selamat datang di *Cloudflare DNS Manager Bot*\\.
+Halo *{name}\\! Selamat datang di *Cloudflare DNS Manager Bot*\\.
 
 Bot ini membantu Anda mengelola DNS Cloudflare langsung dari Telegram\\.
 
-{emoji_settings} *Fitur yang tersedia:*
+*Fitur yang tersedia:*
 • Menambah record DNS
 • Melihat record yang ada  
 • Mengedit record DNS
@@ -74,53 +27,47 @@ Bot ini membantu Anda mengelola DNS Cloudflare langsung dari Telegram\\.
 • Mengelola akun Cloudflare
 
 Ketik /menu untuk mengakses menu utama\\.
-        """.format(emoji_wave=Emojis.WAVE, emoji_settings=Emojis.SETTINGS)
+        """
 
-        SAVE_ERROR = f"{Emojis.WARNING} Terjadi kesalahan saat menyimpan data Anda. Silakan coba lagi nanti."
+        SAVE_ERROR = "Terjadi kesalahan saat menyimpan data Anda. Silakan coba lagi nanti."
 
     class Menu:
         MAIN_WITH_ACCOUNT = """
-*{emoji_cloudflare} CLOUDFLARE DNS MANAGER*
+*CLOUDFLARE DNS MANAGER*
 ━━━━━━━━━━━━━━━━━━━━━━━━
-{emoji_wave} *Nama:* `{{name}}`
-{emoji_email} *Email:* `{{email}}`
-{emoji_key} *API Key:* {{api_key_masked}}
-{emoji_zone} *Zone:* `{{zone_name}}`
+*Nama:* `{name}`
+*Email:* `{email}`
+*API Key:* {api_key_masked}
+*Zone:* `{zone_name}`
 ━━━━━━━━━━━━━━━━━━━━━━━━
 Pilih menu di bawah untuk mengelola DNS Anda\\.
-        """.format(
-            emoji_cloudflare=Emojis.CLOUDFLARE,
-            emoji_wave=Emojis.WAVE,
-            emoji_email=Emojis.EMAIL,
-            emoji_key=Emojis.KEY,
-            emoji_zone=Emojis.ZONE,
-        )
+        """
 
         MAIN_WITHOUT_ACCOUNT = """
-*{emoji_cloudflare} CLOUDFLARE DNS MANAGER*
+*CLOUDFLARE DNS MANAGER*
 ━━━━━━━━━━━━━━━━━━━━━━━━
-{emoji_wave} *Nama:* `{{name}}`
-📱 *Status:* `Belum ada akun terdaftar`
+*Nama:* `{name}`
+*Status:* `Belum ada akun terdaftar`
 ━━━━━━━━━━━━━━━━━━━━━━━━
 Silakan tambahkan akun Cloudflare Anda untuk memulai mengelola DNS\\.
-        """.format(emoji_cloudflare=Emojis.CLOUDFLARE, emoji_wave=Emojis.WAVE)
+        """
 
     class Records:
-        VIEW_TITLE = f"*{Emojis.VIEW_RECORDS} DNS Records Export*"
+        VIEW_TITLE = "*DNS Records Export*"
         VIEW_SUMMARY = """
 {title}
 
-{emoji_zone} *Zone:* `{{zone_name}}`
-{emoji_export} *Total Records:* `{{total_records}}`
-📅 *Exported:* `{{export_time}}`
+*Zone:* `{zone_name}`
+*Total Records:* `{total_records}`
+*Exported:* `{export_time}`
 
 File JSON berisi semua DNS records dengan format yang rapi.
-        """.format(title=VIEW_TITLE, emoji_zone=Emojis.ZONE, emoji_export=Emojis.EXPORT)
+        """.format(title=VIEW_TITLE)
 
-        NO_RECORDS = f"*{Emojis.VIEW_RECORDS} DNS Records*\n\nTidak ada DNS records ditemukan di zone ini.\n\nGunakan /menu untuk kembali ke menu utama."
+        NO_RECORDS = "*DNS Records*\n\nTidak ada DNS records ditemukan di zone ini.\n\nGunakan /menu untuk kembali ke menu utama."
 
-        FETCH_ERROR = f"""
-{Emojis.ERROR} Gagal mengambil DNS records.
+        FETCH_ERROR = """
+Gagal mengambil DNS records.
 
 Kemungkinan penyebab:
 • API Key tidak valid
@@ -130,9 +77,9 @@ Kemungkinan penyebab:
 Gunakan /menu untuk mencoba lagi.
         """
 
-        ADD_TITLE = f"*{Emojis.ADD_RECORD} Tambah Record DNS*"
-        EDIT_TITLE = f"*{Emojis.EDIT_RECORD} Edit Record DNS*"
-        DELETE_TITLE = f"*{Emojis.DELETE_RECORD} Hapus Record DNS*"
+        ADD_TITLE = "*Tambah Record DNS*"
+        EDIT_TITLE = "*Edit Record DNS*"
+        DELETE_TITLE = "*Hapus Record DNS*"
 
         OPERATION_MENU = """
 {title}
@@ -144,39 +91,39 @@ Pilih cara {operation} record DNS:
         """
 
     class CloudflareAccount:
-        ADD_START = f"""
-*➕ Tambah Akun Cloudflare*
+        ADD_START = """
+*Tambah Akun Cloudflare*
 
 Saya akan memandu Anda untuk menambahkan akun Cloudflare\\.
 
-{Emojis.EMAIL} *Langkah 1/3*
+*Langkah 1/3*
 Silakan masukkan email Cloudflare Anda\\:
         """
 
-        EMAIL_SUCCESS = f"""
-{Emojis.SUCCESS} Email berhasil disimpan\\!
+        EMAIL_SUCCESS = """
+Email berhasil disimpan\\!
 
-{Emojis.KEY} *Langkah 2/3*
+*Langkah 2/3*
 Silakan masukkan Global API Key Cloudflare Anda\\:
 
 _API Key dapat ditemukan di\\:_
 My Profile → API Tokens → Global API Key → View
         """
 
-        API_KEY_SUCCESS = f"""
-{Emojis.SUCCESS} API Key berhasil disimpan!
+        API_KEY_SUCCESS = """
+API Key berhasil disimpan!
 
-{Emojis.ID} *Langkah 3/3*
+*Langkah 3/3*
 Silakan masukkan Account ID Cloudflare Anda:
 
 _Account ID dapat ditemukan di:_
 Dashboard → Right sidebar → Account ID
         """
 
-        VERIFYING = f"{Emojis.LOADING} Memverifikasi kredensial dan mengambil daftar zone...\nMohon tunggu sebentar..."
+        VERIFYING = "Memverifikasi kredensial dan mengambil daftar zone...\nMohon tunggu sebentar..."
 
-        VERIFICATION_FAILED = f"""
-{Emojis.ERROR} Gagal mengambil daftar zone. Kemungkinan penyebab:
+        VERIFICATION_FAILED = """
+Gagal mengambil daftar zone. Kemungkinan penyebab:
 • Email, API Key, atau Account ID tidak valid
 • Tidak ada zone di akun Cloudflare
 • Masalah koneksi internet
@@ -184,32 +131,32 @@ Dashboard → Right sidebar → Account ID
 Gunakan /menu untuk mencoba lagi.
         """
 
-        ZONES_FOUND = f"{Emojis.SUCCESS} Berhasil terhubung ke Cloudflare!\n\n{Emojis.MENU} *Ditemukan {{count}} zone:*\nSilakan pilih zone yang ingin dikelola:"
+        ZONES_FOUND = "Berhasil terhubung ke Cloudflare!\n\n*Ditemukan {count} zone:*\nSilakan pilih zone yang ingin dikelola:"
 
-        ACCOUNT_SAVED = f"""
-{Emojis.SUCCESS} *Akun Cloudflare berhasil ditambahkan!*
+        ACCOUNT_SAVED = """
+*Akun Cloudflare berhasil ditambahkan!*
 
-{Emojis.EMAIL} *Email:* `{{email}}`
-{Emojis.ZONE} *Zone:* `{{zone_name}}`
+*Email:* `{email}`
+*Zone:* `{zone_name}`
 
 Sekarang Anda dapat mengelola DNS record.
 Gunakan /menu untuk mengakses fitur-fitur yang tersedia.
         """
 
-        SAVE_FAILED = f"{Emojis.ERROR} Gagal menyimpan akun ke database. Silakan coba lagi.\n\nGunakan /menu untuk mencoba lagi."
+        SAVE_FAILED = "Gagal menyimpan akun ke database. Silakan coba lagi.\n\nGunakan /menu untuk mencoba lagi."
 
-        CANCELLED = f"{Emojis.ERROR} Penambahan akun Cloudflare dibatalkan.\n\nGunakan /menu untuk kembali ke menu utama."
+        CANCELLED = "Penambahan akun Cloudflare dibatalkan.\n\nGunakan /menu untuk kembali ke menu utama."
 
     class Help:
-        CONTENT = f"""
-*{Emojis.HELP} Bantuan Cloudflare DNS Manager*
+        CONTENT = """
+*Bantuan Cloudflare DNS Manager*
 
 *Fitur yang tersedia:*
-• {Emojis.ADD_RECORD} Tambah Record - Menambah record DNS baru
-• {Emojis.VIEW_RECORDS} Lihat Record - Melihat semua record DNS
-• {Emojis.EDIT_RECORD} Edit Record - Mengubah record DNS yang ada
-• {Emojis.DELETE_RECORD} Hapus Record - Menghapus record DNS
-• {Emojis.SETTINGS} Others Menu - Menu tambahan dan pengaturan
+• Tambah Record - Menambah record DNS baru
+• Lihat Record - Melihat semua record DNS
+• Edit Record - Mengubah record DNS yang ada
+• Hapus Record - Menghapus record DNS
+• Others Menu - Menu tambahan dan pengaturan
 
 *Perintah:*
 • /start - Memulai bot dan registrasi
@@ -225,39 +172,35 @@ Gunakan /menu untuk mengakses menu utama.
         """
 
     class Validation:
-        INVALID_EMAIL = f"{Emojis.WARNING} Format email tidak valid. Silakan masukkan email yang benar:"
-        INVALID_API_KEY = f"{Emojis.WARNING} API Key tampaknya tidak valid. Silakan periksa kembali dan masukkan API Key yang benar:"
-        INVALID_ACCOUNT_ID = f"{Emojis.WARNING} Account ID tampaknya tidak valid. Silakan periksa kembali dan masukkan Account ID yang benar:"
-        INVALID_SELECTION = (
-            f"{Emojis.WARNING} Pilihan tidak valid. Gunakan /menu untuk mencoba lagi."
-        )
-        ZONE_NOT_FOUND = (
-            f"{Emojis.WARNING} Zone tidak ditemukan. Gunakan /menu untuk mencoba lagi."
-        )
+        INVALID_EMAIL = "Format email tidak valid. Silakan masukkan email yang benar:"
+        INVALID_API_KEY = "API Key tampaknya tidak valid. Silakan periksa kembali dan masukkan API Key yang benar:"
+        INVALID_ACCOUNT_ID = "Account ID tampaknya tidak valid. Silakan periksa kembali dan masukkan Account ID yang benar:"
+        INVALID_SELECTION = "Pilihan tidak valid. Gunakan /menu untuk mencoba lagi."
+        ZONE_NOT_FOUND = "Zone tidak ditemukan. Gunakan /menu untuk mencoba lagi."
 
 
 # ========== BUTTON LABELS ==========
 class Buttons:
     # Main Menu
-    VIEW_RECORDS = f"{Emojis.VIEW_RECORDS} Lihat Record"
-    ADD_RECORD = f"{Emojis.ADD_RECORD} Tambah Record"
-    EDIT_RECORD = f"{Emojis.EDIT_RECORD} Edit Record"
-    DELETE_RECORD = f"{Emojis.DELETE_RECORD} Hapus Record"
-    OTHERS_MENU = f"{Emojis.SETTINGS} Others Menu"
-    ADD_CLOUDFLARE = "➕ Tambah Akun Cloudflare"
+    VIEW_RECORDS = "Lihat Record"
+    ADD_RECORD = "Tambah Record"
+    EDIT_RECORD = "Edit Record"
+    DELETE_RECORD = "Hapus Record"
+    OTHERS_MENU = "Others Menu"
+    ADD_CLOUDFLARE = "Tambah Akun Cloudflare"
 
     # Operations
     SINGLE_RECORD = "Single Record"
     FROM_FILE = "From File"
 
     # Navigation
-    BACK_TO_MAIN = f"{Emojis.BACK} Back to Main Menu"
-    CANCEL = f"{Emojis.ERROR} Batal"
+    BACK_TO_MAIN = "Back to Main Menu"
+    CANCEL = "Batal"
 
     # Others Menu
-    HELP = f"{Emojis.HELP} Bantuan"
-    DELETE_ACCOUNT = f"{Emojis.DELETE_RECORD} Hapus Akun"
-    SWITCH_ZONE = f"{Emojis.ZONE} Ganti Zone"
+    HELP = "Bantuan"
+    DELETE_ACCOUNT = "Hapus Akun"
+    SWITCH_ZONE = "Ganti Zone"
 
 
 # ========== CALLBACK DATA ==========

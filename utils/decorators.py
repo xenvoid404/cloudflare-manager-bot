@@ -1,5 +1,5 @@
 """
-Decorators for middleware operations like authentication and error handling.
+Decorators untuk operasi middleware seperti autentikasi dan penanganan error.
 """
 
 import logging
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 def require_user_registration(func: Callable) -> Callable:
     """
-    Decorator to ensure user is registered before executing handler.
+    Decorator untuk memastikan user sudah terdaftar sebelum menjalankan handler.
     """
 
     @functools.wraps(func)
@@ -28,7 +28,7 @@ def require_user_registration(func: Callable) -> Callable:
         user = update.effective_user
 
         if not await user_exists(user.id):
-            # Determine response method
+            # Tentukan metode response
             if hasattr(update, "callback_query") and update.callback_query:
                 await update.callback_query.edit_message_text(
                     Messages.Common.UNAUTHORIZED, parse_mode=ParseMode.MARKDOWN_V2
@@ -46,7 +46,7 @@ def require_user_registration(func: Callable) -> Callable:
 
 def require_cloudflare_account(func: Callable) -> Callable:
     """
-    Decorator to ensure user has a Cloudflare account before executing handler.
+    Decorator untuk memastikan user memiliki akun Cloudflare sebelum menjalankan handler.
     """
 
     @functools.wraps(func)
@@ -55,10 +55,10 @@ def require_cloudflare_account(func: Callable) -> Callable:
     ) -> Any:
         user = update.effective_user
 
-        # Check if user has Cloudflare account
+        # Cek apakah user memiliki akun Cloudflare
         account = await get_cloudflare_account(user.id)
         if not account:
-            # Determine response method
+            # Tentukan metode response
             if hasattr(update, "callback_query") and update.callback_query:
                 await update.callback_query.edit_message_text(
                     Messages.Common.NO_ACCOUNT, parse_mode=ParseMode.MARKDOWN_V2
@@ -69,7 +69,7 @@ def require_cloudflare_account(func: Callable) -> Callable:
                 )
             return
 
-        # Add account to context for easy access
+        # Tambahkan akun ke context untuk akses mudah
         context.user_data["cf_account"] = account
         return await func(update, context, *args, **kwargs)
 
@@ -78,7 +78,7 @@ def require_cloudflare_account(func: Callable) -> Callable:
 
 def handle_errors(func: Callable) -> Callable:
     """
-    Decorator for consistent error handling across handlers.
+    Decorator untuk penanganan error yang konsisten di semua handler.
     """
 
     @functools.wraps(func)
@@ -89,9 +89,9 @@ def handle_errors(func: Callable) -> Callable:
             return await func(update, context, *args, **kwargs)
         except Exception as e:
             user_id = update.effective_user.id if update.effective_user else "Unknown"
-            logger.error(f"Error in {func.__name__} for user {user_id}: {e}")
+            logger.error(f"Error dalam {func.__name__} untuk user {user_id}: {e}")
 
-            # Determine response method
+            # Tentukan metode response
             try:
                 if hasattr(update, "callback_query") and update.callback_query:
                     await update.callback_query.edit_message_text(
@@ -102,8 +102,8 @@ def handle_errors(func: Callable) -> Callable:
                         Messages.Common.ERROR_GENERIC, parse_mode=ParseMode.MARKDOWN_V2
                     )
             except Exception as send_error:
-                logger.error(f"Failed to send error message: {send_error}")
-                # Fallback: try to send to chat
+                logger.error(f"Gagal mengirim pesan error: {send_error}")
+                # Fallback: coba kirim ke chat
                 try:
                     await update.effective_chat.send_message(
                         Messages.Common.ERROR_GENERIC
@@ -116,7 +116,7 @@ def handle_errors(func: Callable) -> Callable:
 
 def log_user_action(action_name: str = None):
     """
-    Decorator to log user actions.
+    Decorator untuk log aksi user.
     """
 
     def decorator(func: Callable) -> Callable:
@@ -128,12 +128,12 @@ def log_user_action(action_name: str = None):
             action = action_name or func.__name__
 
             logger.info(
-                f"User {user.id} ({user.username or user.first_name}) executed: {action}"
+                f"User {user.id} ({user.username or user.first_name}) menjalankan: {action}"
             )
 
             result = await func(update, context, *args, **kwargs)
 
-            logger.debug(f"Action {action} completed for user {user.id}")
+            logger.debug(f"Aksi {action} selesai untuk user {user.id}")
             return result
 
         return wrapper
@@ -143,7 +143,7 @@ def log_user_action(action_name: str = None):
 
 def combine_decorators(*decorators):
     """
-    Utility to combine multiple decorators in a clean way.
+    Utility untuk menggabungkan multiple decorators dengan cara yang clean.
     """
 
     def decorator(func):
@@ -154,10 +154,10 @@ def combine_decorators(*decorators):
     return decorator
 
 
-# Common decorator combinations
+# Kombinasi decorator yang umum
 def authenticated_handler(func: Callable) -> Callable:
     """
-    Combines user registration check with error handling and logging.
+    Menggabungkan pengecekan registrasi user dengan penanganan error dan logging.
     """
     return combine_decorators(
         handle_errors, require_user_registration, log_user_action()
@@ -166,7 +166,7 @@ def authenticated_handler(func: Callable) -> Callable:
 
 def cloudflare_handler(func: Callable) -> Callable:
     """
-    Combines user registration, Cloudflare account check, error handling, and logging.
+    Menggabungkan registrasi user, pengecekan akun Cloudflare, penanganan error, dan logging.
     """
     return combine_decorators(
         handle_errors,

@@ -19,14 +19,14 @@ logger = logging.getLogger(__name__)
 
 @authenticated_handler
 async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle /menu command and callback to display the main menu."""
+    """Handle command /menu dan callback untuk menampilkan menu utama."""
     user = update.effective_user
 
-    # Get Cloudflare account data
+    # Dapatkan data akun Cloudflare
     account = await get_cloudflare_account(user.id)
 
     if account:
-        # Display menu for users with Cloudflare account
+        # Tampilkan menu untuk user dengan akun Cloudflare
         keyboard_buttons = [
             [
                 (Buttons.VIEW_RECORDS, CallbackData.GET_RECORDS),
@@ -41,7 +41,7 @@ async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             ],
         ]
 
-        # Format message with account info
+        # Format pesan dengan info akun
         text = safe_format_message(
             Messages.Menu.MAIN_WITH_ACCOUNT,
             name=get_user_display_name(user),
@@ -50,7 +50,7 @@ async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             zone_name=account.get("zone_name", "N/A"),
         )
     else:
-        # Display menu for users without Cloudflare account
+        # Tampilkan menu untuk user tanpa akun Cloudflare
         keyboard_buttons = [
             [
                 (Buttons.ADD_CLOUDFLARE, CallbackData.ADD_CLOUDFLARE),
@@ -66,7 +66,7 @@ async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 
 async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle all button clicks from the menu."""
+    """Handle semua klik button dari menu."""
     try:
         query = update.callback_query
         await query.answer()
@@ -74,24 +74,24 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         user = query.from_user
         callback_data = query.data
 
-        logger.info(f"User {user.id} clicked: {callback_data}")
+        logger.info(f"User {user.id} mengklik: {callback_data}")
 
         await query.edit_message_text(
-            text=f"⚠️ Aksi tidak dikenal: {callback_data}\n\n"
+            text=f"Aksi tidak dikenal: {callback_data}\n\n"
             "Gunakan /menu untuk kembali ke menu utama\\.",
             parse_mode=ParseMode.MARKDOWN_V2,
         )
 
     except Exception as e:
-        logger.error(f"Error in menu callback for user {update.effective_user.id}: {e}")
+        logger.error(f"Error dalam menu callback untuk user {update.effective_user.id}: {e}")
         try:
             await update.callback_query.edit_message_text(
-                "⚠️ Terjadi kesalahan. Gunakan /menu untuk mencoba lagi."
+                "Terjadi kesalahan. Gunakan /menu untuk mencoba lagi."
             )
         except:
-            # If edit fails, send new message
+            # Jika edit gagal, kirim pesan baru
             await update.effective_chat.send_message(
-                "⚠️ Terjadi kesalahan. Gunakan /menu untuk mencoba lagi."
+                "Terjadi kesalahan. Gunakan /menu untuk mencoba lagi."
             )
 
 
@@ -100,11 +100,11 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 async def back_to_main_menu_callback(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
-    """Handle back to main menu callback."""
+    """Handle callback kembali ke menu utama."""
     query = update.callback_query
     await query.answer()
 
-    # Call menu_command to display main menu
+    # Panggil menu_command untuk menampilkan menu utama
     await menu_command(update, context)
 
 
