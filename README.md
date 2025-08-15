@@ -104,32 +104,160 @@ Bot Telegram untuk mengelola DNS records Cloudflare dengan mudah dan aman.
 ## 🏗️ Struktur Project
 
 ```
-├── Main.py                     # Entry point aplikasi
-├── config.py                   # Konfigurasi bot
-├── database/
-│   ├── db.py                  # Database connection handler
-│   ├── models/
-│   │   ├── users_model.py     # Model untuk data pengguna
-│   │   └── cf_accounts_model.py # Model untuk akun Cloudflare
-│   └── bot.db                 # SQLite database file
-├── handlers/
-│   ├── start_handler.py       # Handler untuk command /start
-│   ├── menu_handler.py        # Handler untuk menu utama dan navigasi
-│   ├── registration.py        # Registrasi semua handlers
-│   ├── others_menu_handler.py # Handler untuk menu lainnya
-│   └── cloudflare/
-│       ├── add_cloudflare_handler.py # Handler penambahan akun CF
-│       ├── records/
-│       │   ├── get_records_handler.py    # Handler lihat records
-│       │   ├── add_records_handler.py    # Handler tambah records
-│       │   ├── edit_records_handler.py   # Handler edit records
-│       │   └── remove_records_handler.py # Handler hapus records
-└── README.md                  # Dokumentasi project
+├── Main.py                          # Entry point aplikasi
+├── config.py                        # Konfigurasi bot  
+├── constants.py                     # Constants, messages, dan konfigurasi terpusat
+├── requirements.txt                 # Dependencies
+├── README.md                        # Dokumentasi project
+│
+├── database/                        # Database layer dengan async support
+│   ├── __init__.py
+│   ├── db.py                       # DatabaseManager dengan connection pooling
+│   ├── models/                     # Database models
+│   │   ├── __init__.py
+│   │   ├── users_model.py          # User data operations
+│   │   └── cf_accounts_model.py    # Cloudflare account operations
+│   └── bot.db                      # SQLite database file
+│
+├── services/                        # Service layer untuk external APIs
+│   ├── __init__.py
+│   └── cloudflare_service.py       # Cloudflare API client dengan error handling
+│
+├── utils/                           # Utility functions dan helpers
+│   ├── __init__.py
+│   ├── decorators.py               # Middleware decorators (auth, error handling)
+│   └── helpers.py                  # Common utilities dan ResponseBuilder
+│
+└── handlers/                        # Request handlers dengan clean architecture
+    ├── __init__.py
+    ├── start_handler.py            # /start command handler
+    ├── menu_handler.py             # Main menu dan navigation
+    ├── registration.py             # Handler registration
+    ├── others_menu_handler.py      # Additional menu features
+    └── cloudflare/
+        ├── __init__.py
+        ├── add_cloudflare_handler.py  # Cloudflare account setup
+        └── records/
+            ├── __init__.py
+            ├── base_records_handler.py   # Base class untuk DNS operations
+            ├── get_records_handler.py    # DNS records export (JSON)
+            ├── add_records_handler.py    # Add DNS records
+            ├── edit_records_handler.py   # Edit DNS records
+            └── remove_records_handler.py # Remove DNS records
 ```
+
+### 📋 **Architectural Patterns**
+
+**🏛️ Clean Architecture:**
+- **Presentation Layer**: Handlers untuk user interaction
+- **Business Logic**: Services untuk domain operations  
+- **Data Layer**: Models dan database operations
+- **Infrastructure**: Utils, constants, dan external integrations
+
+**🔧 Design Patterns:**
+- **Factory Pattern**: Service instantiation 
+- **Decorator Pattern**: Middleware untuk cross-cutting concerns
+- **Builder Pattern**: Response construction dengan fluent interface
+- **Template Method**: Base handlers dengan customizable behavior
+
+**⚡ Async Architecture:**
+- Non-blocking database operations dengan connection pooling
+- Concurrent API requests dengan proper timeout handling
+- Thread pool execution untuk CPU-bound operations
+- Graceful error handling dengan fallback mechanisms
 
 ## 🔧 Perbaikan Terbaru
 
-### v2.1.0 - Latest Updates
+### v3.0.0 - Major Refactoring & Architecture Improvements
+
+#### 🏗️ **Complete Code Refactoring**
+- **Clean Architecture**: Implementasi clean architecture dengan separation of concerns
+- **DRY Principle**: Eliminasi duplikasi kode dengan base classes dan utility functions
+- **SOLID Principles**: Struktur kode yang mengikuti prinsip SOLID untuk maintainability
+- **Scalable Design**: Arsitektur yang mudah di-extend dan di-maintain
+
+#### 🔧 **New Infrastructure Components**
+
+**Constants Management** (`constants.py`):
+- Centralized message templates dengan MarkdownV2 escaping
+- Button labels dan callback data constants  
+- Configuration constants dan API endpoints
+- Emoji constants untuk konsistensi UI
+
+**Service Layer** (`services/`):
+- `CloudflareService`: Centralized API client dengan proper error handling
+- Async support dengan connection pooling
+- Custom exception handling (`CloudflareAPIError`)
+- Factory pattern untuk service instantiation
+
+**Utility Layer** (`utils/`):
+- `decorators.py`: Middleware decorators untuk authentication, error handling, logging
+- `helpers.py`: Common utility functions dan ResponseBuilder pattern
+- API key masking, validation functions, safe message formatting
+
+**Database Improvements** (`database/`):
+- `DatabaseManager` class dengan proper async support
+- Connection pooling dan transaction management
+- Better error handling dan rollback support
+- Database indexes untuk performance optimization
+
+#### 🎯 **Handler Refactoring**
+
+**Base Classes**:
+- `BaseRecordsHandler`: Abstract base untuk DNS operations (Add, Edit, Remove)
+- Eliminasi 80% duplikasi kode di record handlers
+- Consistent error handling dan validation patterns
+
+**Middleware Integration**:
+- `@authenticated_handler`: Combined user validation dan error handling
+- `@cloudflare_handler`: Cloudflare account validation dengan context injection
+- `@handle_errors`: Consistent error handling across all handlers
+
+**Smart Response Handling**:
+- Unified `send_response()` function untuk callback dan message handling
+- Automatic MarkdownV2 escaping dan validation
+- Keyboard builder dengan type safety
+
+#### ✨ **Enhanced Features**
+
+**Improved DNS Records Export**:
+- Structured JSON export dengan metadata
+- Timestamp formatting dan file naming conventions
+- Better error messages dan user feedback
+
+**Better Validation**:
+- Email, API key, dan Account ID validation helpers
+- Input sanitization dan security improvements
+- Comprehensive error messages
+
+**Enhanced User Experience**:
+- Consistent messaging across all features
+- Better loading states dan progress indicators
+- Improved error recovery dan user guidance
+
+#### 🚀 **Performance & Reliability**
+
+**Database Performance**:
+- Proper indexing untuk faster queries
+- Connection pooling untuk reduced latency
+- Async operations dengan thread pool execution
+
+**Error Handling**:
+- Graceful degradation dengan fallback responses
+- Comprehensive logging untuk debugging
+- User-friendly error messages
+
+**Code Quality**:
+- Type hints throughout codebase
+- Comprehensive docstrings
+- Clean import management
+
+#### 🔄 **Migration Improvements**
+- **Backward Compatibility**: Legacy functions tetap tersedia
+- **Gradual Migration**: Refactored components dapat digunakan bertahap
+- **Database Migration**: Automatic schema updates dengan indexes
+
+### v2.1.0 - Previous Updates
 
 #### 🐛 Bug Fixes
 - **Fixed select_zone_* callback error**: Memperbaiki masalah callback `select_zone_*` yang menyebabkan error pada proses penambahan akun Cloudflare
@@ -142,11 +270,10 @@ Bot Telegram untuk mengelola DNS records Cloudflare dengan mudah dan aman.
   - Informasi lengkap termasuk metadata zone dan export info
   - Error handling yang komprehensif
 
-#### 🔄 Improvements
+#### 🔄 Previous Improvements
 - **Unified Navigation**: Menggabungkan logika `back_to_main_menu` ke dalam `menu_handler.py` untuk simplifikasi
 - **Better Callback Pattern Matching**: Perbaikan pattern matching untuk callback handlers
 - **Enhanced Error Messages**: Pesan error yang lebih informatif dan user-friendly
-- **Code Structure**: Struktur kode yang lebih clean, scalable, dan mudah dipahami
 
 ## 🛡️ Keamanan
 

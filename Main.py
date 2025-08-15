@@ -9,7 +9,7 @@ from telegram.ext import Application, ContextTypes
 from telegram.error import TelegramError
 
 from config import config
-from database import db
+from database.db import init_db
 from handlers.registration import register_all_handlers
 
 
@@ -81,9 +81,8 @@ class TelegramBot:
     async def _init_database(self) -> None:
         """Initialize database with async support."""
         try:
-            # Run database initialization in thread pool to avoid blocking
-            loop = asyncio.get_event_loop()
-            await loop.run_in_executor(None, db.init_db)
+            # Initialize database with proper async support
+            await init_db()
             logger.info("Database initialized successfully")
         except Exception as e:
             logger.error(f"Database initialization failed: {e}")
