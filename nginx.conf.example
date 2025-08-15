@@ -1,0 +1,93 @@
+# Nginx configuration example for Telegram Bot webhook
+# Place this in /etc/nginx/sites-available/ and create a symlink to sites-enabled/
+
+server {
+    listen 80;
+    server_name your-domain.com www.your-domain.com;
+    
+    # Redirect HTTP to HTTPS
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name your-domain.com www.your-domain.com;
+    
+    # SSL Configuration
+    ssl_certificate /path/to/your/ssl/certificate.pem;
+    ssl_certificate_key /path/to/your/ssl/private.key;
+    
+    # SSL Security Settings
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    
+    # Security Headers
+    add_header X-Frame-Options DENY;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    
+    # Telegram Bot Webhook
+    location /YOUR_BOT_TOKEN {
+        # Forward to your bot application
+        proxy_pass http://127.0.0.1:8000/YOUR_BOT_TOKEN;
+        
+        # Proxy headers
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Telegram specific settings
+        proxy_set_header X-Telegram-Bot-Api-Secret-Token $http_x_telegram_bot_api_secret_token;
+        
+        # Timeouts
+        proxy_connect_timeout 30s;
+        proxy_send_timeout 30s;
+        proxy_read_timeout 30s;
+        
+        # Buffer settings
+        proxy_buffering off;
+        proxy_request_buffering off;
+        
+        # Only allow POST requests from Telegram IP ranges
+        limit_except POST {
+            deny all;
+        }
+    }
+    
+    # Optional: Health check endpoint
+    location /health {
+        proxy_pass http://127.0.0.1:8000/health;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    
+    # Block all other requests
+    location / {
+        return 404;
+    }
+    
+    # Logging
+    access_log /var/log/nginx/telegram_bot_access.log;
+    error_log /var/log/nginx/telegram_bot_error.log;
+}
+
+# Rate limiting for webhook endpoint (optional)
+http {
+    limit_req_zone $binary_remote_addr zone=telegram_webhook:10m rate=10r/s;
+    
+    server {
+        # ... server configuration ...
+        
+        location /YOUR_BOT_TOKEN {
+            limit_req zone=telegram_webhook burst=20 nodelay;
+            # ... rest of location configuration ...
+        }
+    }
+}

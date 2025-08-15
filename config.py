@@ -37,11 +37,6 @@ class Config:
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     LOG_FILE: Optional[str] = os.getenv("LOG_FILE")  # Optional log file
     
-    # --- Security Configuration ---
-    ENCRYPTION_KEY: str = os.getenv("ENCRYPTION_KEY", "")
-    if not ENCRYPTION_KEY:
-        logger.warning("ENCRYPTION_KEY not set! API keys will not be encrypted properly.")
-    
     # --- Application Settings ---
     DEBUG: bool = os.getenv("DEBUG", "False").lower() in ("true", "1", "yes")
     MAX_RETRIES: int = int(os.getenv("MAX_RETRIES", "3"))
