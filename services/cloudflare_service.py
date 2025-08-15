@@ -1,6 +1,6 @@
 """
-Cloudflare API service for DNS management operations.
-Centralizes all Cloudflare API interactions with proper error handling.
+Cloudflare API service untuk operasi manajemen DNS.
+Mengumpulkan semua interaksi Cloudflare API dengan penanganan error yang tepat.
 """
 
 import logging
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class CloudflareAPIError(Exception):
-    """Custom exception for Cloudflare API errors."""
+    """Exception kustom untuk error Cloudflare API."""
 
     def __init__(
         self,
@@ -31,15 +31,15 @@ class CloudflareAPIError(Exception):
 
 class CloudflareService:
     """
-    Service class for Cloudflare API operations.
+    Service class untuk operasi Cloudflare API.
     """
 
     def __init__(self, email: str, api_key: str):
         """
-        Initialize the service with credentials.
+        Inisialisasi service dengan kredensial.
 
         Args:
-            email: Cloudflare account email
+            email: Email akun Cloudflare
             api_key: Cloudflare Global API Key
         """
         self.email = email
@@ -48,28 +48,28 @@ class CloudflareService:
 
     def _make_request(self, method: str, url: str, **kwargs) -> requests.Response:
         """
-        Make HTTP request to Cloudflare API with error handling.
+        Buat HTTP request ke Cloudflare API dengan penanganan error.
 
         Args:
             method: HTTP method (GET, POST, PUT, DELETE)
             url: API endpoint URL
-            **kwargs: Additional request parameters
+            **kwargs: Parameter request tambahan
 
         Returns:
-            Response object
+            Objek Response
 
         Raises:
-            CloudflareAPIError: If request fails
+            CloudflareAPIError: Jika request gagal
         """
         try:
             kwargs.setdefault("headers", self.headers)
             kwargs.setdefault("timeout", Config.CLOUDFLARE_API_TIMEOUT)
 
-            logger.debug(f"Making {method} request to {url}")
+            logger.debug(f"Melakukan {method} request ke {url}")
 
             response = requests.request(method, url, **kwargs)
 
-            # Log response details
+            # Log detail response
             logger.debug(f"Response status: {response.status_code}")
 
             if not response.ok:
@@ -86,45 +86,45 @@ class CloudflareService:
             return response
 
         except requests.exceptions.RequestException as e:
-            logger.error(f"Network error in Cloudflare API request: {e}")
+            logger.error(f"Network error dalam Cloudflare API request: {e}")
             raise CloudflareAPIError(f"Network error: {str(e)}")
         except Exception as e:
-            logger.error(f"Unexpected error in Cloudflare API request: {e}")
-            raise CloudflareAPIError(f"Unexpected error: {str(e)}")
+            logger.error(f"Error tidak terduga dalam Cloudflare API request: {e}")
+            raise CloudflareAPIError(f"Error tidak terduga: {str(e)}")
 
     def _parse_response(self, response: requests.Response) -> Dict[str, Any]:
         """
-        Parse and validate Cloudflare API response.
+        Parse dan validasi response Cloudflare API.
 
         Args:
-            response: HTTP response object
+            response: Objek HTTP response
 
         Returns:
-            Parsed response data
+            Data response yang diparsing
 
         Raises:
-            CloudflareAPIError: If response is invalid
+            CloudflareAPIError: Jika response tidak valid
         """
         try:
             data = response.json()
         except ValueError as e:
-            raise CloudflareAPIError(f"Invalid JSON response: {e}")
+            raise CloudflareAPIError(f"JSON response tidak valid: {e}")
 
         if not data.get("success", False):
-            errors = data.get("errors", ["Unknown error"])
-            raise CloudflareAPIError(f"API returned error: {errors}", errors=errors)
+            errors = data.get("errors", ["Error tidak diketahui"])
+            raise CloudflareAPIError(f"API mengembalikan error: {errors}", errors=errors)
 
         return data
 
     async def get_zones(self) -> List[Dict[str, Any]]:
         """
-        Fetch all zones from Cloudflare account.
+        Ambil semua zona dari akun Cloudflare.
 
         Returns:
-            List of zone dictionaries with id, name, and status
+            Daftar kamus zona dengan id, nama, dan status
 
         Raises:
-            CloudflareAPIError: If API request fails
+            CloudflareAPIError: Jika request API gagal
         """
         try:
             response = self._make_request("GET", CloudflareAPI.zones_endpoint())
@@ -142,27 +142,27 @@ class CloudflareService:
                     }
                 )
 
-            logger.info(f"Successfully fetched {len(zones)} zones")
+            logger.info(f"Berhasil mengambil {len(zones)} zona")
             return zones
 
         except CloudflareAPIError:
             raise
         except Exception as e:
-            logger.error(f"Error fetching zones: {e}")
-            raise CloudflareAPIError(f"Failed to fetch zones: {str(e)}")
+            logger.error(f"Error mengambil zona: {e}")
+            raise CloudflareAPIError(f"Gagal mengambil zona: {str(e)}")
 
     async def get_dns_records(self, zone_id: str) -> List[Dict[str, Any]]:
         """
-        Fetch all DNS records for a specific zone.
+        Ambil semua rekaman DNS untuk zona tertentu.
 
         Args:
-            zone_id: Cloudflare zone ID
+            zone_id: ID zona Cloudflare
 
         Returns:
-            List of DNS record dictionaries
+            Daftar kamus rekaman DNS
 
         Raises:
-            CloudflareAPIError: If API request fails
+            CloudflareAPIError: Jika request API gagal
         """
         try:
             response = self._make_request(
@@ -186,42 +186,42 @@ class CloudflareService:
                     "zone_name": record.get("zone_name"),
                 }
 
-                # Add priority for MX records
+                # Tambahkan prioritas untuk rekaman MX
                 if record.get("type") == "MX" and "priority" in record:
                     formatted_record["priority"] = record["priority"]
 
-                # Add additional data if present
+                # Tambahkan data tambahan jika ada
                 if "data" in record and record["data"]:
                     formatted_record["data"] = record["data"]
 
                 records.append(formatted_record)
 
             logger.info(
-                f"Successfully fetched {len(records)} DNS records for zone {zone_id}"
+                f"Berhasil mengambil {len(records)} rekaman DNS untuk zona {zone_id}"
             )
             return records
 
         except CloudflareAPIError:
             raise
         except Exception as e:
-            logger.error(f"Error fetching DNS records for zone {zone_id}: {e}")
-            raise CloudflareAPIError(f"Failed to fetch DNS records: {str(e)}")
+            logger.error(f"Error mengambil rekaman DNS untuk zona {zone_id}: {e}")
+            raise CloudflareAPIError(f"Gagal mengambil rekaman DNS: {str(e)}")
 
     async def create_dns_record(
         self, zone_id: str, record_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
-        Create a new DNS record.
+        Buat rekaman DNS baru.
 
         Args:
-            zone_id: Cloudflare zone ID
-            record_data: DNS record data (type, name, content, etc.)
+            zone_id: ID zona Cloudflare
+            record_data: Data rekaman DNS (tipe, nama, konten, dll.)
 
         Returns:
-            Created DNS record data
+            Data rekaman DNS yang dibuat
 
         Raises:
-            CloudflareAPIError: If API request fails
+            CloudflareAPIError: Jika request API gagal
         """
         try:
             response = self._make_request(
@@ -231,32 +231,32 @@ class CloudflareService:
 
             record = data.get("result", {})
             logger.info(
-                f"Successfully created DNS record {record.get('id')} in zone {zone_id}"
+                f"Berhasil membuat rekaman DNS {record.get('id')} di zona {zone_id}"
             )
             return record
 
         except CloudflareAPIError:
             raise
         except Exception as e:
-            logger.error(f"Error creating DNS record in zone {zone_id}: {e}")
-            raise CloudflareAPIError(f"Failed to create DNS record: {str(e)}")
+            logger.error(f"Error membuat rekaman DNS di zona {zone_id}: {e}")
+            raise CloudflareAPIError(f"Gagal membuat rekaman DNS: {str(e)}")
 
     async def update_dns_record(
         self, zone_id: str, record_id: str, record_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
-        Update an existing DNS record.
+        Perbarui rekaman DNS yang ada.
 
         Args:
-            zone_id: Cloudflare zone ID
-            record_id: DNS record ID to update
-            record_data: Updated DNS record data
+            zone_id: ID zona Cloudflare
+            record_id: ID rekaman DNS untuk diperbarui
+            record_data: Data rekaman DNS yang diperbarui
 
         Returns:
-            Updated DNS record data
+            Data rekaman DNS yang diperbarui
 
         Raises:
-            CloudflareAPIError: If API request fails
+            CloudflareAPIError: Jika request API gagal
         """
         try:
             response = self._make_request(
@@ -268,7 +268,7 @@ class CloudflareService:
 
             record = data.get("result", {})
             logger.info(
-                f"Successfully updated DNS record {record_id} in zone {zone_id}"
+                f"Berhasil memperbarui rekaman DNS {record_id} di zona {zone_id}"
             )
             return record
 
@@ -276,23 +276,23 @@ class CloudflareService:
             raise
         except Exception as e:
             logger.error(
-                f"Error updating DNS record {record_id} in zone {zone_id}: {e}"
+                f"Error memperbarui rekaman DNS {record_id} di zona {zone_id}: {e}"
             )
-            raise CloudflareAPIError(f"Failed to update DNS record: {str(e)}")
+            raise CloudflareAPIError(f"Gagal memperbarui rekaman DNS: {str(e)}")
 
     async def delete_dns_record(self, zone_id: str, record_id: str) -> bool:
         """
-        Delete a DNS record.
+        Hapus rekaman DNS.
 
         Args:
-            zone_id: Cloudflare zone ID
-            record_id: DNS record ID to delete
+            zone_id: ID zona Cloudflare
+            record_id: ID rekaman DNS untuk dihapus
 
         Returns:
-            True if deletion was successful
+            True jika penghapusan berhasil
 
         Raises:
-            CloudflareAPIError: If API request fails
+            CloudflareAPIError: Jika request API gagal
         """
         try:
             response = self._make_request(
@@ -301,7 +301,7 @@ class CloudflareService:
             data = self._parse_response(response)
 
             logger.info(
-                f"Successfully deleted DNS record {record_id} from zone {zone_id}"
+                f"Berhasil menghapus rekaman DNS {record_id} dari zona {zone_id}"
             )
             return True
 
@@ -309,23 +309,23 @@ class CloudflareService:
             raise
         except Exception as e:
             logger.error(
-                f"Error deleting DNS record {record_id} from zone {zone_id}: {e}"
+                f"Error menghapus rekaman DNS {record_id} dari zona {zone_id}: {e}"
             )
-            raise CloudflareAPIError(f"Failed to delete DNS record: {str(e)}")
+            raise CloudflareAPIError(f"Gagal menghapus rekaman DNS: {str(e)}")
 
     async def get_dns_record(self, zone_id: str, record_id: str) -> Dict[str, Any]:
         """
-        Get details of a specific DNS record.
+        Dapatkan detail rekaman DNS spesifik.
 
         Args:
-            zone_id: Cloudflare zone ID
-            record_id: DNS record ID
+            zone_id: ID zona Cloudflare
+            record_id: ID rekaman DNS
 
         Returns:
-            DNS record data
+            Data rekaman DNS
 
         Raises:
-            CloudflareAPIError: If API request fails
+            CloudflareAPIError: Jika request API gagal
         """
         try:
             response = self._make_request(
@@ -335,7 +335,7 @@ class CloudflareService:
 
             record = data.get("result", {})
             logger.info(
-                f"Successfully fetched DNS record {record_id} from zone {zone_id}"
+                f"Berhasil mengambil rekaman DNS {record_id} dari zona {zone_id}"
             )
             return record
 
@@ -343,35 +343,35 @@ class CloudflareService:
             raise
         except Exception as e:
             logger.error(
-                f"Error fetching DNS record {record_id} from zone {zone_id}: {e}"
+                f"Error mengambil rekaman DNS {record_id} dari zona {zone_id}: {e}"
             )
-            raise CloudflareAPIError(f"Failed to fetch DNS record: {str(e)}")
+            raise CloudflareAPIError(f"Gagal mengambil rekaman DNS: {str(e)}")
 
     async def verify_credentials(self) -> Tuple[bool, str]:
         """
-        Verify if the provided credentials are valid.
+        Verifikasi apakah kredensial yang diberikan valid.
 
         Returns:
-            Tuple of (is_valid, message)
+            Tuple dari (is_valid, pesan)
         """
         try:
             zones = await self.get_zones()
-            return True, f"Credentials verified. Found {len(zones)} zones."
+            return True, f"Kredensial diverifikasi. Ditemukan {len(zones)} zona."
         except CloudflareAPIError as e:
-            return False, f"Invalid credentials: {e.message}"
+            return False, f"Kredensial tidak valid: {e.message}"
         except Exception as e:
-            return False, f"Verification failed: {str(e)}"
+            return False, f"Verifikasi gagal: {str(e)}"
 
 
 def create_cloudflare_service(email: str, api_key: str) -> CloudflareService:
     """
-    Factory function to create CloudflareService instance.
+    Fungsi pabrik untuk membuat instance CloudflareService.
 
     Args:
-        email: Cloudflare account email
+        email: Email akun Cloudflare
         api_key: Cloudflare Global API Key
 
     Returns:
-        CloudflareService instance
+        Instance CloudflareService
     """
     return CloudflareService(email, api_key)

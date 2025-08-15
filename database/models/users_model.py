@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 
 async def save_user(user_data: Dict[str, Any]) -> bool:
-    """Save or update user data with improved error handling."""
+    """Simpan atau update data user dengan penanganan error yang lebih baik."""
     try:
         query = """
         INSERT INTO users (chat_id, username, first_name, last_name)
@@ -28,16 +28,16 @@ async def save_user(user_data: Dict[str, Any]) -> bool:
             ),
         )
 
-        logger.info(f"User {user_data.get('chat_id')} saved successfully")
+        logger.info(f"User {user_data.get('chat_id')} berhasil disimpan")
         return True
 
     except Exception as e:
-        logger.error(f"Failed to save user {user_data.get('chat_id')}: {e}")
+        logger.error(f"Gagal menyimpan user {user_data.get('chat_id')}: {e}")
         return False
 
 
 async def get_user(user_id: int) -> Optional[Dict[str, Any]]:
-    """Get user data by ID."""
+    """Dapatkan data user berdasarkan ID."""
     try:
         query = """
         SELECT chat_id, username, first_name, last_name, created_at, updated_at
@@ -52,36 +52,36 @@ async def get_user(user_id: int) -> Optional[Dict[str, Any]]:
         return None
 
     except Exception as e:
-        logger.error(f"Failed to get user {user_id}: {e}")
+        logger.error(f"Gagal mendapatkan user {user_id}: {e}")
         return None
 
 
 async def user_exists(user_id: int) -> bool:
-    """Check if user is registered in database."""
+    """Cek apakah user sudah terdaftar di database."""
     try:
         query = "SELECT 1 FROM users WHERE chat_id = ? LIMIT 1"
         result = await db_manager.execute_query(query, (user_id,), fetch_one=True)
         return result is not None
 
     except Exception as e:
-        logger.error(f"Failed to check user existence {user_id}: {e}")
+        logger.error(f"Gagal cek keberadaan user {user_id}: {e}")
         return False
 
 
 async def user_has_account(user_id: int) -> bool:
-    """Check if user has a Cloudflare account stored."""
+    """Cek apakah user memiliki akun Cloudflare yang tersimpan."""
     try:
         query = "SELECT 1 FROM cf_accounts WHERE user_id = ? LIMIT 1"
         result = await db_manager.execute_query(query, (user_id,), fetch_one=True)
         return result is not None
 
     except Exception as e:
-        logger.error(f"Failed to check user account {user_id}: {e}")
+        logger.error(f"Gagal cek akun user {user_id}: {e}")
         return False
 
 
 async def get_user_stats() -> Dict[str, int]:
-    """Get user statistics."""
+    """Dapatkan statistik user."""
     try:
         total_users_query = "SELECT COUNT(*) as count FROM users"
         users_with_accounts_query = """
@@ -101,5 +101,5 @@ async def get_user_stats() -> Dict[str, int]:
         }
 
     except Exception as e:
-        logger.error(f"Failed to get user stats: {e}")
+        logger.error(f"Gagal mendapatkan statistik user: {e}")
         return {"total_users": 0, "users_with_accounts": 0}

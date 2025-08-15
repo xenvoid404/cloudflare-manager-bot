@@ -13,28 +13,27 @@ from database.db import init_db
 from handlers.registration import register_all_handlers
 
 
-# Setup logging with improved configuration
 def setup_logging() -> None:
-    """Configure logging with both console and optional file output."""
+    """Konfigurasi logging dengan output console dan file opsional."""
     log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
-    # Configure root logger
+    # Konfigurasi root logger
     logging.basicConfig(
         format=log_format, level=getattr(logging, config.LOG_LEVEL.upper()), handlers=[]
     )
 
-    # Add console handler
+    # Tambah console handler
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(logging.Formatter(log_format))
     logging.getLogger().addHandler(console_handler)
 
-    # Add file handler if configured
+    # Tambah file handler jika dikonfigurasi
     if config.LOG_FILE:
         file_handler = logging.FileHandler(config.LOG_FILE)
         file_handler.setFormatter(logging.Formatter(log_format))
         logging.getLogger().addHandler(file_handler)
 
-    # Reduce noise from external libraries
+    # Kurangi noise dari library eksternal
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("telegram").setLevel(logging.INFO)
 
@@ -43,88 +42,88 @@ logger = logging.getLogger(__name__)
 
 
 class TelegramBot:
-    """Main Telegram bot class with improved error handling and lifecycle management."""
+    """Kelas utama Telegram bot dengan penanganan error dan manajemen lifecycle yang lebih baik."""
 
     def __init__(self):
         self.application: Application = None
         self._shutdown_event = asyncio.Event()
 
     async def initialize(self) -> None:
-        """Initialize the bot application and database."""
+        """Inisialisasi aplikasi bot dan database."""
         try:
-            # Initialize database first
+            # Inisialisasi database terlebih dahulu
             await self._init_database()
 
-            # Build application with improved configuration
+            # Build aplikasi dengan konfigurasi yang lebih baik
             builder = Application.builder()
             builder.token(config.BOT_TOKEN)
 
-            # Configure request settings
+            # Konfigurasi pengaturan request
             builder.read_timeout(config.REQUEST_TIMEOUT)
             builder.write_timeout(config.REQUEST_TIMEOUT)
             builder.connect_timeout(config.REQUEST_TIMEOUT)
 
-            # Build the application
+            # Build aplikasi
             self.application = builder.build()
 
-            # Register all handlers
+            # Daftarkan semua handler
             register_all_handlers(self.application)
-            logger.info("All handlers registered successfully")
+            logger.info("Semua handler berhasil didaftarkan")
 
-            # Set up error handler
+            # Setup error handler
             self.application.add_error_handler(self._error_handler)
 
         except Exception as e:
-            logger.error(f"Failed to initialize bot: {e}")
+            logger.error(f"Gagal menginisialisasi bot: {e}")
             raise
 
     async def _init_database(self) -> None:
-        """Initialize database with async support."""
+        """Inisialisasi database dengan dukungan async."""
         try:
-            # Initialize database with proper async support
+            # Inisialisasi database dengan dukungan async yang tepat
             await init_db()
-            logger.info("Database initialized successfully")
+            logger.info("Database berhasil diinisialisasi")
         except Exception as e:
-            logger.error(f"Database initialization failed: {e}")
+            logger.error(f"Inisialisasi database gagal: {e}")
             raise
 
     async def _error_handler(
         self, update: object, context: ContextTypes.DEFAULT_TYPE
     ) -> None:
-        """Global error handler for the bot."""
-        logger.error(f"Exception while handling an update: {context.error}")
+        """Global error handler untuk bot."""
+        logger.error(f"Exception saat menangani update: {context.error}")
 
-        # Log the update that caused the error
+        # Log update yang menyebabkan error
         if update:
-            logger.error(f"Update that caused error: {update}")
+            logger.error(f"Update yang menyebabkan error: {update}")
 
-        # Send error notification to user if possible
+        # Kirim notifikasi error ke user jika memungkinkan
         if isinstance(update, Update) and update.effective_chat:
             try:
                 await context.bot.send_message(
                     chat_id=update.effective_chat.id,
-                    text="⚠️ Terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi nanti.",
+                    text="Terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi nanti.",
                 )
             except TelegramError as e:
-                logger.error(f"Failed to send error message to user: {e}")
+                logger.error(f"Gagal mengirim pesan error ke user: {e}")
 
     async def start_webhook(self) -> None:
-        """Start the bot with webhook configuration."""
+        """Mulai bot dengan konfigurasi webhook."""
         if not config.WEBHOOK_URL:
-            raise ValueError("WEBHOOK_URL is required for webhook mode")
+            raise ValueError("WEBHOOK_URL diperlukan untuk mode webhook")
 
         webhook_info = config.get_webhook_info()
-        logger.info(f"Starting webhook at {config.LISTEN_IP}:{config.PORT}")
+        logger.info(f"Memulai webhook di {config.LISTEN_IP}:{config.PORT}")
         logger.info(f"Webhook URL: {webhook_info['url']}")
 
         try:
-            # Initialize the application
+            # Inisialisasi aplikasi
             await self.application.initialize()
 
-            # Start the webhook
+            # Mulai aplikasi
             await self.application.start()
 
-            # Set up the webhook
+            # Setup webhook
             await self.application.updater.start_webhook(
                 listen=config.LISTEN_IP,
                 port=config.PORT,
@@ -134,118 +133,118 @@ class TelegramBot:
                 drop_pending_updates=webhook_info["drop_pending_updates"],
             )
 
-            logger.info("Webhook started successfully")
+            logger.info("Webhook berhasil dimulai")
 
-            # Wait for shutdown signal
+            # Tunggu sinyal shutdown
             await self._shutdown_event.wait()
 
         except Exception as e:
-            logger.error(f"Failed to start webhook: {e}")
+            logger.error(f"Gagal memulai webhook: {e}")
             raise
         finally:
             await self.stop()
 
     async def start_polling(self) -> None:
-        """Start the bot with polling (for development)."""
-        logger.info("Starting bot in polling mode")
+        """Mulai bot dengan polling (untuk development)."""
+        logger.info("Memulai bot dalam mode polling")
 
         try:
-            # Initialize and start the application
+            # Inisialisasi dan mulai aplikasi
             await self.application.initialize()
             await self.application.start()
 
-            # Start polling
+            # Mulai polling
             await self.application.updater.start_polling(
                 allowed_updates=Update.ALL_TYPES, drop_pending_updates=True
             )
 
-            logger.info("Polling started successfully")
+            logger.info("Polling berhasil dimulai")
 
-            # Wait for shutdown signal
+            # Tunggu sinyal shutdown
             await self._shutdown_event.wait()
 
         except Exception as e:
-            logger.error(f"Failed to start polling: {e}")
+            logger.error(f"Gagal memulai polling: {e}")
             raise
         finally:
             await self.stop()
 
     async def stop(self) -> None:
-        """Gracefully stop the bot."""
+        """Hentikan bot dengan graceful."""
         if not self.application:
             return
 
-        logger.info("Stopping bot...")
+        logger.info("Menghentikan bot...")
 
         try:
-            # Stop the updater
+            # Hentikan updater
             if self.application.updater.running:
                 await self.application.updater.stop()
 
-            # Stop the application
+            # Hentikan aplikasi
             if self.application.running:
                 await self.application.stop()
 
-            # Shutdown the application
+            # Shutdown aplikasi
             await self.application.shutdown()
 
-            logger.info("Bot stopped successfully")
+            logger.info("Bot berhasil dihentikan")
 
         except Exception as e:
-            logger.error(f"Error during bot shutdown: {e}")
+            logger.error(f"Error saat shutdown bot: {e}")
 
     def shutdown(self) -> None:
-        """Signal shutdown from signal handler."""
+        """Signal shutdown dari signal handler."""
         self._shutdown_event.set()
 
 
 def signal_handler(bot: TelegramBot) -> None:
-    """Handle shutdown signals gracefully."""
+    """Handle sinyal shutdown dengan graceful."""
 
     def handler(signum, frame):
-        logger.info(f"Received signal {signum}, shutting down...")
+        logger.info(f"Menerima sinyal {signum}, melakukan shutdown...")
         bot.shutdown()
 
     return handler
 
 
 async def main() -> NoReturn:
-    """Main entry point for the bot."""
+    """Entry point utama untuk bot."""
     setup_logging()
-    logger.info("Starting Cloudflare DNS Manager Bot")
+    logger.info("Memulai Cloudflare DNS Manager Bot")
 
-    # Create bot instance
+    # Buat instance bot
     bot = TelegramBot()
 
-    # Set up signal handlers for graceful shutdown
+    # Setup signal handler untuk graceful shutdown
     for sig in (signal.SIGTERM, signal.SIGINT):
         signal.signal(sig, signal_handler(bot))
 
     try:
-        # Initialize the bot
+        # Inisialisasi bot
         await bot.initialize()
 
-        # Start the bot based on configuration
+        # Mulai bot berdasarkan konfigurasi
         if config.WEBHOOK_URL:
             await bot.start_webhook()
         else:
-            logger.info("No WEBHOOK_URL configured, starting in polling mode")
+            logger.info("WEBHOOK_URL tidak dikonfigurasi, memulai dalam mode polling")
             await bot.start_polling()
 
     except KeyboardInterrupt:
-        logger.info("Bot stopped by user")
+        logger.info("Bot dihentikan oleh user")
     except Exception as e:
-        logger.error(f"Unexpected error: {e}")
+        logger.error(f"Error tidak terduga: {e}")
         sys.exit(1)
     finally:
-        logger.info("Bot shutdown complete")
+        logger.info("Shutdown bot selesai")
 
 
 if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        logger.info("Process interrupted by user")
+        logger.info("Proses diinterupsi oleh user")
     except Exception as e:
-        logger.error(f"Fatal error: {e}")
+        logger.error(f"Error fatal: {e}")
         sys.exit(1)

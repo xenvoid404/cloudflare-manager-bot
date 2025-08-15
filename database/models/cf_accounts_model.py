@@ -6,9 +6,9 @@ logger = logging.getLogger(__name__)
 
 
 async def save_cloudflare_account(account_data: Dict[str, Any]) -> bool:
-    """Save Cloudflare account configuration with improved error handling."""
+    """Simpan konfigurasi akun Cloudflare dengan penanganan error yang lebih baik."""
     try:
-        # Use INSERT OR REPLACE for better handling
+        # Gunakan INSERT OR REPLACE untuk penanganan yang lebih baik
         query = """
         INSERT OR REPLACE INTO cf_accounts 
         (user_id, email, api_key, account_id, zone_id, zone_name, 
@@ -25,25 +25,25 @@ async def save_cloudflare_account(account_data: Dict[str, Any]) -> bool:
             account_data["account_id"],
             account_data["zone_id"],
             account_data["zone_name"],
-            account_data["user_id"],  # For the COALESCE subquery
+            account_data["user_id"],  # Untuk COALESCE subquery
         )
 
         await db_manager.execute_query(query, params)
 
         logger.info(
-            f"Cloudflare account for user {account_data['user_id']} saved successfully"
+            f"Akun Cloudflare untuk user {account_data['user_id']} berhasil disimpan"
         )
         return True
 
     except Exception as e:
         logger.error(
-            f"Failed to save Cloudflare account for user {account_data.get('user_id')}: {e}"
+            f"Gagal menyimpan akun Cloudflare untuk user {account_data.get('user_id')}: {e}"
         )
         return False
 
 
 async def get_cloudflare_account(user_id: int) -> Optional[Dict[str, Any]]:
-    """Get Cloudflare account data for a specific user."""
+    """Dapatkan data akun Cloudflare untuk user tertentu."""
     try:
         query = """
         SELECT user_id, email, api_key, zone_id, zone_name, account_id, created_at, updated_at
@@ -59,12 +59,12 @@ async def get_cloudflare_account(user_id: int) -> Optional[Dict[str, Any]]:
         return None
 
     except Exception as e:
-        logger.error(f"Failed to get Cloudflare account for user {user_id}: {e}")
+        logger.error(f"Gagal mendapatkan akun Cloudflare untuk user {user_id}: {e}")
         return None
 
 
 async def delete_cloudflare_account(user_id: int) -> bool:
-    """Delete Cloudflare account for a user."""
+    """Hapus akun Cloudflare untuk user."""
     try:
         query = "DELETE FROM cf_accounts WHERE user_id = ?"
 
@@ -80,32 +80,32 @@ async def delete_cloudflare_account(user_id: int) -> bool:
 
             if cursor.rowcount > 0:
                 logger.info(
-                    f"Cloudflare account for user {user_id} deleted successfully"
+                    f"Akun Cloudflare untuk user {user_id} berhasil dihapus"
                 )
                 return True
             else:
-                logger.warning(f"No Cloudflare account found for user {user_id}")
+                logger.warning(f"Tidak ada akun Cloudflare ditemukan untuk user {user_id}")
                 return False
 
     except Exception as e:
-        logger.error(f"Failed to delete Cloudflare account for user {user_id}: {e}")
+        logger.error(f"Gagal menghapus akun Cloudflare untuk user {user_id}: {e}")
         return False
 
 
 async def account_exists(user_id: int) -> bool:
-    """Check if user has a Cloudflare account."""
+    """Cek apakah user memiliki akun Cloudflare."""
     try:
         query = "SELECT 1 FROM cf_accounts WHERE user_id = ? LIMIT 1"
         result = await db_manager.execute_query(query, (user_id,), fetch_one=True)
         return result is not None
 
     except Exception as e:
-        logger.error(f"Failed to check account existence for user {user_id}: {e}")
+        logger.error(f"Gagal cek keberadaan akun untuk user {user_id}: {e}")
         return False
 
 
 async def get_all_accounts() -> List[Dict[str, Any]]:
-    """Get all Cloudflare accounts (for admin purposes)."""
+    """Dapatkan semua akun Cloudflare (untuk keperluan admin)."""
     try:
         query = """
         SELECT cf.*, u.username, u.first_name, u.last_name
@@ -121,12 +121,12 @@ async def get_all_accounts() -> List[Dict[str, Any]]:
         return []
 
     except Exception as e:
-        logger.error(f"Failed to get all accounts: {e}")
+        logger.error(f"Gagal mendapatkan semua akun: {e}")
         return []
 
 
 async def get_accounts_stats() -> Dict[str, Any]:
-    """Get Cloudflare accounts statistics."""
+    """Dapatkan statistik akun Cloudflare."""
     try:
         total_query = "SELECT COUNT(*) as count FROM cf_accounts"
         zones_query = "SELECT COUNT(DISTINCT zone_id) as count FROM cf_accounts"
@@ -146,5 +146,5 @@ async def get_accounts_stats() -> Dict[str, Any]:
         }
 
     except Exception as e:
-        logger.error(f"Failed to get accounts stats: {e}")
+        logger.error(f"Gagal mendapatkan statistik akun: {e}")
         return {"total_accounts": 0, "unique_zones": 0, "recent_accounts": 0}

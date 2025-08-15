@@ -3,71 +3,71 @@ import logging
 from dotenv import load_dotenv
 from typing import Optional
 
-# Load environment variables from .env file
+# Load environment variables dari file .env
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 
 class Config:
-    """Centralized configuration class for the Telegram bot."""
+    """Kelas konfigurasi terpusat untuk Telegram bot."""
 
-    # --- Bot Configuration ---
+    # --- Konfigurasi Bot ---
     BOT_TOKEN: str = os.getenv("BOT_TOKEN", "")
     if not BOT_TOKEN:
         raise ValueError(
-            "BOT_TOKEN is required! Please set it in your .env file or environment variables."
+            "BOT_TOKEN diperlukan! Silakan set di file .env atau environment variables."
         )
 
-    # --- Webhook Configuration ---
+    # --- Konfigurasi Webhook ---
     WEBHOOK_URL: str = os.getenv("WEBHOOK_URL", "")
     WEBHOOK_PATH: str = os.getenv("WEBHOOK_PATH", "wangshu")
 
-    # Validate webhook URL for production
+    # Validasi webhook URL untuk production
     if WEBHOOK_URL and not WEBHOOK_URL.startswith("https://"):
-        logger.warning("WEBHOOK_URL should use HTTPS for production!")
+        logger.warning("WEBHOOK_URL sebaiknya menggunakan HTTPS untuk production!")
 
-    # --- Server Configuration ---
+    # --- Konfigurasi Server ---
     LISTEN_IP: str = os.getenv("LISTEN_IP", "127.0.0.1")
     PORT: int = int(os.getenv("PORT", "8000"))
 
-    # --- Database Configuration ---
+    # --- Konfigurasi Database ---
     DATABASE_FILE: str = os.getenv("DATABASE_FILE", "database/bot.db")
     DATABASE_POOL_SIZE: int = int(os.getenv("DATABASE_POOL_SIZE", "10"))
 
-    # --- Logging Configuration ---
+    # --- Konfigurasi Logging ---
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     LOG_FILE: Optional[str] = os.getenv("LOG_FILE")
 
-    # --- Application Settings ---
+    # --- Pengaturan Aplikasi ---
     DEBUG: bool = os.getenv("DEBUG", "False").lower() in ("true", "1", "yes")
     MAX_RETRIES: int = int(os.getenv("MAX_RETRIES", "3"))
     REQUEST_TIMEOUT: int = int(os.getenv("REQUEST_TIMEOUT", "30"))
 
     @classmethod
     def validate(cls) -> bool:
-        """Validate critical configuration values."""
+        """Validasi nilai konfigurasi kritis."""
         errors = []
 
         if not cls.BOT_TOKEN:
-            errors.append("BOT_TOKEN is required")
+            errors.append("BOT_TOKEN diperlukan")
 
         if cls.WEBHOOK_URL and not cls.WEBHOOK_URL.startswith("https://"):
-            errors.append("WEBHOOK_URL must use HTTPS in production")
+            errors.append("WEBHOOK_URL harus menggunakan HTTPS di production")
 
         if cls.PORT < 1024 or cls.PORT > 65535:
-            errors.append("PORT must be between 1024 and 65535")
+            errors.append("PORT harus antara 1024 dan 65535")
 
         if errors:
             for error in errors:
-                logger.error(f"Configuration error: {error}")
+                logger.error(f"Error konfigurasi: {error}")
             return False
 
         return True
 
     @classmethod
     def get_webhook_info(cls) -> dict:
-        """Get webhook configuration info."""
+        """Dapatkan informasi konfigurasi webhook."""
         if not cls.WEBHOOK_URL:
             return {}
 
@@ -78,16 +78,16 @@ class Config:
         }
 
 
-# Initialize configuration
+# Inisialisasi konfigurasi
 config = Config()
 
-# Validate configuration on import
+# Validasi konfigurasi saat import
 if not config.validate():
     raise ValueError(
-        "Configuration validation failed! Please check your environment variables."
+        "Validasi konfigurasi gagal! Silakan periksa environment variables Anda."
     )
 
-# Legacy compatibility - export commonly used values
+# Legacy compatibility - export nilai yang sering digunakan
 BOT_TOKEN = config.BOT_TOKEN
 WEBHOOK_URL = config.WEBHOOK_URL
 WEBHOOK_PATH = config.WEBHOOK_PATH
