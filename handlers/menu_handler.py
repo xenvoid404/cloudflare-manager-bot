@@ -9,15 +9,20 @@ logger = logging.getLogger(__name__)
 
 
 async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle /menu command and display the main menu."""
+    """Handle /menu command and callback to display the main menu."""
     try:
         user = update.effective_user
-
+        
+        # Determine if this is a callback or command
+        is_callback = hasattr(update, 'callback_query') and update.callback_query is not None
+        
         # Check if user is registered
         if not await user_exists(user.id):
-            await update.message.reply_text(
-                "⚠️ Silakan jalankan /start terlebih dahulu untuk menggunakan bot ini."
-            )
+            message_text = "⚠️ Silakan jalankan /start terlebih dahulu untuk menggunakan bot ini."
+            if is_callback:
+                await update.callback_query.edit_message_text(message_text)
+            else:
+                await update.message.reply_text(message_text)
             return
 
         # Get Cloudflare account data
@@ -80,15 +85,30 @@ async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             )
 
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(
-            text, parse_mode=ParseMode.MARKDOWN_V2, reply_markup=reply_markup
-        )
+        
+        # Send response based on update type
+        if is_callback:
+            await update.callback_query.edit_message_text(
+                text, parse_mode=ParseMode.MARKDOWN_V2, reply_markup=reply_markup
+            )
+        else:
+            await update.message.reply_text(
+                text, parse_mode=ParseMode.MARKDOWN_V2, reply_markup=reply_markup
+            )
 
     except Exception as e:
         logger.error(f"Error in menu command for user {update.effective_user.id}: {e}")
-        await update.message.reply_text(
-            "⚠️ Terjadi kesalahan saat menampilkan menu. Silakan coba lagi."
-        )
+        error_message = "⚠️ Terjadi kesalahan saat menampilkan menu. Silakan coba lagi."
+        
+        # Handle error response based on update type
+        is_callback = hasattr(update, 'callback_query') and update.callback_query is not None
+        if is_callback:
+            try:
+                await update.callback_query.edit_message_text(error_message)
+            except:
+                await update.effective_chat.send_message(error_message)
+        else:
+            await update.message.reply_text(error_message)
 
 
 async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -121,10 +141,29 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             )
 
 
+async def back_to_main_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle back to main menu callback."""
+    try:
+        query = update.callback_query
+        await query.answer()
+        
+        # Call menu_command to display main menu
+        await menu_command(update, context)
+        
+        logger.info(f"User {update.effective_user.id} returned to main menu")
+        
+    except Exception as e:
+        logger.error(f"Error returning to main menu for user {update.effective_user.id}: {e}")
+        await update.callback_query.edit_message_text(
+            "⚠️ Terjadi kesalahan. Gunakan /menu untuk kembali ke menu utama."
+        )
+
+
 menu_handlers = [
     CommandHandler("menu", menu_command),
+    CallbackQueryHandler(back_to_main_menu_callback, pattern="^back_to_main_menu$"),
     CallbackQueryHandler(
         menu_callback,
-        pattern="^(?!add_cloudflare|get_records|add_records|edit_records|remove_records|others_menu|back_to_main_menu|switch_zone|help_menu).*$",
+        pattern="^(?!add_cloudflare|get_records|add_records|edit_records|remove_records|others_menu|back_to_main_menu|switch_zone|help_menu|select_zone_|cancel_add_account).*$",
     ),
 ]
