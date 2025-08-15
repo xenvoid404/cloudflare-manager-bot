@@ -128,7 +128,6 @@ class TelegramBot:
                 port=config.PORT,
                 url_path=config.WEBHOOK_PATH,
                 webhook_url=webhook_info["url"],
-                secret_token=webhook_info["secret_token"],
                 allowed_updates=webhook_info["allowed_updates"],
                 drop_pending_updates=webhook_info["drop_pending_updates"]
             )

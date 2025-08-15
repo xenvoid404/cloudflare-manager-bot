@@ -48,7 +48,6 @@ Edit file `.env` dan isi dengan konfigurasi Anda:
 BOT_TOKEN=your_bot_token_from_botfather
 WEBHOOK_URL=https://your-domain.com
 WEBHOOK_PATH=wangshu
-WEBHOOK_SECRET_TOKEN=your_secret_token_here
 ```
 
 ### 4. Inisialisasi Database
@@ -125,7 +124,6 @@ cloudflare-dns-bot/
 | `BOT_TOKEN` | Token bot dari BotFather | **Required** |
 | `WEBHOOK_URL` | URL webhook (kosongkan untuk polling) | - |
 | `WEBHOOK_PATH` | Path webhook | `wangshu` |
-| `WEBHOOK_SECRET_TOKEN` | Secret token untuk webhook | `your_secret_token_here` |
 | `LISTEN_IP` | IP address untuk bind server | `127.0.0.1` |
 | `PORT` | Port untuk server | `8000` |
 | `DATABASE_FILE` | Path file database SQLite | `database/bot.db` |
@@ -184,9 +182,9 @@ CREATE TABLE cf_accounts (
 ### Webhook Security
 
 - Menggunakan HTTPS dengan SSL certificate
-- Secret token untuk validasi webhook
 - Rate limiting di nginx
 - Hanya menerima POST request dari Telegram
+- Path webhook yang sederhana dan aman
 
 ### Data Security
 

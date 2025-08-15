@@ -18,8 +18,7 @@ class Config:
     
     # --- Webhook Configuration ---
     WEBHOOK_URL: str = os.getenv("WEBHOOK_URL", "")
-    WEBHOOK_PATH: str = os.getenv("WEBHOOK_PATH", "wangshu")  # Changed default to wangshu
-    WEBHOOK_SECRET_TOKEN: str = os.getenv("WEBHOOK_SECRET_TOKEN", "your_secret_token_here")
+    WEBHOOK_PATH: str = os.getenv("WEBHOOK_PATH", "wangshu")  # Simple and easy path
     
     # Validate webhook URL for production
     if WEBHOOK_URL and not WEBHOOK_URL.startswith("https://"):
@@ -71,7 +70,6 @@ class Config:
             
         return {
             "url": f"{cls.WEBHOOK_URL}/{cls.WEBHOOK_PATH}",
-            "secret_token": cls.WEBHOOK_SECRET_TOKEN,
             "allowed_updates": ["message", "callback_query"],
             "drop_pending_updates": True
         }
