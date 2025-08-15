@@ -318,7 +318,7 @@ add_cloudflare_handler = AddCloudflareHandler()
 add_cloudflare_conversation = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(
-            add_cloudflare_handler.start_add_account, pattern="^add_cloudflare"
+            add_cloudflare_handler.start_add_account, pattern="^add_cloudflare$"
         )
     ],
     states={
