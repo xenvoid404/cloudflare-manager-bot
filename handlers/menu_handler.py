@@ -1,94 +1,66 @@
 import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update
 from telegram.ext import CommandHandler, ContextTypes, CallbackQueryHandler
 from telegram.constants import ParseMode
-from database.models.users_model import user_exists
+
 from database.models.cf_accounts_model import get_cloudflare_account
+from constants import Messages, Buttons, CallbackData, Patterns
+from utils.decorators import authenticated_handler, handle_errors, log_user_action
+from utils.helpers import (
+    mask_api_key, get_user_display_name, safe_format_message, 
+    send_response, create_inline_keyboard
+)
 
 logger = logging.getLogger(__name__)
 
 
+@authenticated_handler
 async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle /menu command and display the main menu."""
-    try:
-        user = update.effective_user
+    """Handle /menu command and callback to display the main menu."""
+    user = update.effective_user
+    
+    # Get Cloudflare account data
+    account = await get_cloudflare_account(user.id)
 
-        # Check if user is registered
-        if not await user_exists(user.id):
-            await update.message.reply_text(
-                "⚠️ Silakan jalankan /start terlebih dahulu untuk menggunakan bot ini."
-            )
-            return
+    if account:
+        # Display menu for users with Cloudflare account
+        keyboard_buttons = [
+            [
+                (Buttons.VIEW_RECORDS, CallbackData.GET_RECORDS),
+                (Buttons.ADD_RECORD, CallbackData.ADD_RECORDS),
+            ],
+            [
+                (Buttons.EDIT_RECORD, CallbackData.EDIT_RECORDS),
+                (Buttons.DELETE_RECORD, CallbackData.REMOVE_RECORDS),
+            ],
+            [
+                (Buttons.OTHERS_MENU, CallbackData.OTHERS_MENU),
+            ],
+        ]
 
-        # Get Cloudflare account data
-        account = await get_cloudflare_account(user.id)
+        # Format message with account info
+        text = safe_format_message(
+            Messages.Menu.MAIN_WITH_ACCOUNT,
+            name=get_user_display_name(user),
+            email=account.get('email', 'N/A'),
+            api_key_masked=mask_api_key(account.get('api_key', '')),
+            zone_name=account.get('zone_name', 'N/A')
+        )
+    else:
+        # Display menu for users without Cloudflare account
+        keyboard_buttons = [
+            [
+                (Buttons.ADD_CLOUDFLARE, CallbackData.ADD_CLOUDFLARE),
+            ],
+        ]
 
-        if account:
-            # Display menu for users with Cloudflare account
-            keyboard = [
-                [
-                    InlineKeyboardButton(
-                        "📋 Lihat Record", callback_data="get_records"
-                    ),
-                    InlineKeyboardButton(
-                        "📝 Tambah Record", callback_data="add_records"
-                    ),
-                ],
-                [
-                    InlineKeyboardButton("♻️ Edit Record", callback_data="edit_records"),
-                    InlineKeyboardButton(
-                        "🗑️ Hapus Record", callback_data="remove_records"
-                    ),
-                ],
-                [InlineKeyboardButton("⚙️ Others Menu", callback_data="others_menu")],
-            ]
-
-            # Hide API Key for security (show only first and last 4 characters)
-            api_key_hidden = (
-                f"`{account['api_key'][:4]}...{account['api_key'][-4:]}`"
-                if account.get("api_key") and len(account["api_key"]) > 8
-                else "`Tidak tersedia`"
-            )
-
-            text = (
-                "*🌐 CLOUDFLARE DNS MANAGER*\n"
-                "━━━━━━━━━━━━━━━━━━━━━━━━\n"
-                f"👤 *Nama:* `{user.first_name or 'N/A'}`\n"
-                f"📧 *Email:* `{account.get('email', 'N/A')}`\n"
-                f"🔑 *API Key:* {api_key_hidden}\n"
-                f"🌍 *Zone:* `{account.get('zone_name', 'N/A')}`\n"
-                "━━━━━━━━━━━━━━━━━━━━━━━━\n"
-                "Pilih menu di bawah untuk mengelola DNS Anda\\."
-            )
-        else:
-            # Display menu for users without Cloudflare account
-            keyboard = [
-                [
-                    InlineKeyboardButton(
-                        "➕ Tambah Akun Cloudflare", callback_data="add_cloudflare"
-                    )
-                ],
-            ]
-
-            text = (
-                "*🌐 CLOUDFLARE DNS MANAGER*\n"
-                "━━━━━━━━━━━━━━━━━━━━━━━━\n"
-                f"👤 *Nama:* `{user.first_name or 'N/A'}`\n"
-                "📱 *Status:* `Belum ada akun terdaftar`\n"
-                "━━━━━━━━━━━━━━━━━━━━━━━━\n"
-                "Silakan tambahkan akun Cloudflare Anda untuk memulai mengelola DNS\\."
-            )
-
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text(
-            text, parse_mode=ParseMode.MARKDOWN_V2, reply_markup=reply_markup
+        text = safe_format_message(
+            Messages.Menu.MAIN_WITHOUT_ACCOUNT,
+            name=get_user_display_name(user)
         )
 
-    except Exception as e:
-        logger.error(f"Error in menu command for user {update.effective_user.id}: {e}")
-        await update.message.reply_text(
-            "⚠️ Terjadi kesalahan saat menampilkan menu. Silakan coba lagi."
-        )
+    keyboard = create_inline_keyboard(keyboard_buttons)
+    await send_response(update, text, reply_markup=keyboard)
 
 
 async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -121,10 +93,19 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             )
 
 
+@handle_errors
+@log_user_action("back_to_main_menu")
+async def back_to_main_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle back to main menu callback."""
+    query = update.callback_query
+    await query.answer()
+    
+    # Call menu_command to display main menu
+    await menu_command(update, context)
+
+
 menu_handlers = [
     CommandHandler("menu", menu_command),
-    CallbackQueryHandler(
-        menu_callback,
-        pattern="^(?!add_cloudflare|get_records|add_records|edit_records|remove_records|others_menu|back_to_main_menu|switch_zone|help_menu).*$",
-    ),
+    CallbackQueryHandler(back_to_main_menu_callback, pattern=f"^{CallbackData.BACK_TO_MAIN_MENU}$"),
+    CallbackQueryHandler(menu_callback, pattern=Patterns.get_menu_callback_exclusions()),
 ]

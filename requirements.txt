@@ -1,0 +1,11 @@
+# Telegram Bot API
+python-telegram-bot>=20.0
+
+# HTTP requests for Cloudflare API
+requests>=2.28.0
+
+# Environment variables
+python-dotenv>=0.19.0
+
+# Logging (included in stdlib but for explicit documentation)
+# Built-in: sqlite3, asyncio, logging, json, datetime, typing, re

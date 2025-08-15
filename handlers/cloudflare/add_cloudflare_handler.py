@@ -1,6 +1,4 @@
 import logging
-import asyncio
-import requests
 from typing import Dict, Any, Optional
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -11,8 +9,15 @@ from telegram.ext import (
     CallbackQueryHandler,
 )
 from telegram.constants import ParseMode
+
 from database.models.cf_accounts_model import save_cloudflare_account
-from database.models.users_model import user_exists
+from services.cloudflare_service import create_cloudflare_service, CloudflareAPIError
+from constants import Messages, Buttons, CallbackData, Config
+from utils.decorators import handle_errors, require_user_registration
+from utils.helpers import (
+    validate_email, validate_api_key, validate_account_id,
+    send_response, create_inline_keyboard, get_user_display_name
+)
 
 logger = logging.getLogger(__name__)
 
@@ -26,117 +31,59 @@ class AddCloudflareHandler:
     def __init__(self):
         self.user_data: Dict[int, Dict[str, Any]] = {}
 
+    @require_user_registration
+    @handle_errors
     async def start_add_account(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> int:
         """Start the Cloudflare account addition process."""
-        try:
-            user = update.effective_user
+        user = update.effective_user
 
-            # Check if user is registered
-            if not await user_exists(user.id):
-                await update.callback_query.edit_message_text(
-                    "⚠️ Silakan jalankan /start terlebih dahulu untuk menggunakan bot ini."
-                )
-                return ConversationHandler.END
+        # Initialize user data
+        self.user_data[user.id] = {}
 
-            # Initialize user data
-            self.user_data[user.id] = {}
+        await send_response(update, Messages.CloudflareAccount.ADD_START)
 
-            await update.callback_query.edit_message_text(
-                text="*➕ Tambah Akun Cloudflare*\n\n"
-                "Saya akan memandu Anda untuk menambahkan akun Cloudflare\\.\n\n"
-                "📧 *Langkah 1/3*\n"
-                "Silakan masukkan email Cloudflare Anda:",
-                parse_mode=ParseMode.MARKDOWN_V2,
-            )
+        logger.info(f"User {user.id} started Cloudflare account addition")
+        return EMAIL
 
-            logger.info(f"User {user.id} started Cloudflare account addition")
-            return EMAIL
-        except Exception as e:
-            logger.error(
-                f"Error starting add account for user {update.effective_user.id}: {e}"
-            )
-            await update.callback_query.edit_message_text(
-                "⚠️ Terjadi kesalahan. Gunakan /menu untuk mencoba lagi."
-            )
-            return ConversationHandler.END
-
+    @handle_errors
     async def handle_email(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> int:
         """Handle email input."""
-        try:
-            user = update.effective_user
-            email = update.message.text.strip()
+        user = update.effective_user
+        email = update.message.text.strip()
 
-            # Basic email validation
-            if "@" not in email or "." not in email:
-                await update.message.reply_text(
-                    "⚠️ Format email tidak valid. Silakan masukkan email yang benar:"
-                )
-                return EMAIL
+        # Validate email format
+        if not validate_email(email):
+            await send_response(update, Messages.Validation.INVALID_EMAIL)
+            return EMAIL
 
-            # Store email
-            self.user_data[user.id]["email"] = email
+        # Store email
+        self.user_data[user.id]["email"] = email
 
-            await update.message.reply_text(
-                text="✅ Email berhasil disimpan\\!\n\n"
-                "🔑 *Langkah 2/3*\n"
-                "Silakan masukkan Global API Key Cloudflare Anda:\n\n"
-                "_API Key dapat ditemukan di:_\n"
-                "My Profile → API Tokens → Global API Key → View",
-                parse_mode=ParseMode.MARKDOWN_V2,
-            )
+        await send_response(update, Messages.CloudflareAccount.EMAIL_SUCCESS)
+        return API_KEY
 
-            return API_KEY
-
-        except Exception as e:
-            logger.error(
-                f"Error handling email for user {update.effective_user.id}: {e}"
-            )
-            await update.message.reply_text(
-                "⚠️ Terjadi kesalahan. Gunakan /menu untuk memulai ulang."
-            )
-            return ConversationHandler.END
-
+    @handle_errors
     async def handle_api_key(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> int:
         """Handle API key input."""
-        try:
-            user = update.effective_user
-            api_key = update.message.text.strip()
+        user = update.effective_user
+        api_key = update.message.text.strip()
 
-            # Basic API key validation (Cloudflare Global API Key length)
-            if len(api_key) < 32:
-                await update.message.reply_text(
-                    "⚠️ API Key tampaknya tidak valid. Silakan periksa kembali dan masukkan API Key yang benar:"
-                )
-                return API_KEY
+        # Validate API key format
+        if not validate_api_key(api_key):
+            await send_response(update, Messages.Validation.INVALID_API_KEY)
+            return API_KEY
 
-            # Store API key
-            self.user_data[user.id]["api_key"] = api_key
+        # Store API key
+        self.user_data[user.id]["api_key"] = api_key
 
-            await update.message.reply_text(
-                text="✅ API Key berhasil disimpan\\!\n\n"
-                "🆔 *Langkah 3/3*\n"
-                "Silakan masukkan Account ID Cloudflare Anda:\n\n"
-                "_Account ID dapat ditemukan di:_\n"
-                "Dashboard → Right sidebar → Account ID",
-                parse_mode=ParseMode.MARKDOWN_V2,
-            )
-
-            return ACCOUNT_ID
-
-        except Exception as e:
-            logger.error(
-                f"Error handling API key for user {update.effective_user.id}: {e}"
-            )
-            await update.message.reply_text(
-                "⚠️ Terjadi kesalahan. Gunakan /menu untuk memulai ulang."
-            )
-            return ConversationHandler.END
+        await send_response(update, Messages.CloudflareAccount.API_KEY_SUCCESS)
+        return ACCOUNT_ID
 
     async def handle_account_id(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
