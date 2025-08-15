@@ -8,5 +8,7 @@ remove_handler = RemoveRecordsHandler()
 
 # Handler exports
 remove_records_handlers = [
-    CallbackQueryHandler(remove_handler.handle_operation, pattern=f"^{CallbackData.REMOVE_RECORDS}$"),
+    CallbackQueryHandler(
+        remove_handler.handle_operation, pattern=f"^{CallbackData.REMOVE_RECORDS}$"
+    ),
 ]

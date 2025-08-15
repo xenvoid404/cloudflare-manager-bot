@@ -7,8 +7,11 @@ from database.models.cf_accounts_model import get_cloudflare_account
 from constants import Messages, Buttons, CallbackData, Patterns
 from utils.decorators import authenticated_handler, handle_errors, log_user_action
 from utils.helpers import (
-    mask_api_key, get_user_display_name, safe_format_message, 
-    send_response, create_inline_keyboard
+    mask_api_key,
+    get_user_display_name,
+    safe_format_message,
+    send_response,
+    create_inline_keyboard,
 )
 
 logger = logging.getLogger(__name__)
@@ -18,7 +21,7 @@ logger = logging.getLogger(__name__)
 async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle /menu command and callback to display the main menu."""
     user = update.effective_user
-    
+
     # Get Cloudflare account data
     account = await get_cloudflare_account(user.id)
 
@@ -42,9 +45,9 @@ async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         text = safe_format_message(
             Messages.Menu.MAIN_WITH_ACCOUNT,
             name=get_user_display_name(user),
-            email=account.get('email', 'N/A'),
-            api_key_masked=mask_api_key(account.get('api_key', '')),
-            zone_name=account.get('zone_name', 'N/A')
+            email=account.get("email", "N/A"),
+            api_key_masked=mask_api_key(account.get("api_key", "")),
+            zone_name=account.get("zone_name", "N/A"),
         )
     else:
         # Display menu for users without Cloudflare account
@@ -55,8 +58,7 @@ async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         ]
 
         text = safe_format_message(
-            Messages.Menu.MAIN_WITHOUT_ACCOUNT,
-            name=get_user_display_name(user)
+            Messages.Menu.MAIN_WITHOUT_ACCOUNT, name=get_user_display_name(user)
         )
 
     keyboard = create_inline_keyboard(keyboard_buttons)
@@ -95,17 +97,23 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
 @handle_errors
 @log_user_action("back_to_main_menu")
-async def back_to_main_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def back_to_main_menu_callback(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """Handle back to main menu callback."""
     query = update.callback_query
     await query.answer()
-    
+
     # Call menu_command to display main menu
     await menu_command(update, context)
 
 
 menu_handlers = [
     CommandHandler("menu", menu_command),
-    CallbackQueryHandler(back_to_main_menu_callback, pattern=f"^{CallbackData.BACK_TO_MAIN_MENU}$"),
-    CallbackQueryHandler(menu_callback, pattern=Patterns.get_menu_callback_exclusions()),
+    CallbackQueryHandler(
+        back_to_main_menu_callback, pattern=f"^{CallbackData.BACK_TO_MAIN_MENU}$"
+    ),
+    CallbackQueryHandler(
+        menu_callback, pattern=Patterns.get_menu_callback_exclusions()
+    ),
 ]

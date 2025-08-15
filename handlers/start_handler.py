@@ -33,8 +33,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     # Create welcome message with user's name
     welcome_msg = safe_format_message(
-        Messages.Start.WELCOME,
-        name=get_user_display_name(user)
+        Messages.Start.WELCOME, name=get_user_display_name(user)
     )
 
     await send_response(update, welcome_msg)

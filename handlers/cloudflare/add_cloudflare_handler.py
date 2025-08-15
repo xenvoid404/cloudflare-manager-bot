@@ -1,4 +1,5 @@
 import logging
+import requests
 from typing import Dict, Any, Optional
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -15,8 +16,12 @@ from services.cloudflare_service import create_cloudflare_service, CloudflareAPI
 from constants import Messages, Buttons, CallbackData, Config
 from utils.decorators import handle_errors, require_user_registration
 from utils.helpers import (
-    validate_email, validate_api_key, validate_account_id,
-    send_response, create_inline_keyboard, get_user_display_name
+    validate_email,
+    validate_api_key,
+    validate_account_id,
+    send_response,
+    create_inline_keyboard,
+    get_user_display_name,
 )
 
 logger = logging.getLogger(__name__)

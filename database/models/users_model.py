@@ -25,7 +25,7 @@ async def save_user(user_data: Dict[str, Any]) -> bool:
                 user_data.get("username"),
                 user_data.get("first_name"),
                 user_data.get("last_name"),
-            )
+            ),
         )
 
         logger.info(f"User {user_data.get('chat_id')} saved successfully")
@@ -89,15 +89,17 @@ async def get_user_stats() -> Dict[str, int]:
         FROM users u 
         INNER JOIN cf_accounts cf ON u.chat_id = cf.user_id
         """
-        
+
         total_result = await db_manager.execute_query(total_users_query, fetch_one=True)
-        accounts_result = await db_manager.execute_query(users_with_accounts_query, fetch_one=True)
-        
+        accounts_result = await db_manager.execute_query(
+            users_with_accounts_query, fetch_one=True
+        )
+
         return {
             "total_users": total_result["count"] if total_result else 0,
-            "users_with_accounts": accounts_result["count"] if accounts_result else 0
+            "users_with_accounts": accounts_result["count"] if accounts_result else 0,
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to get user stats: {e}")
         return {"total_users": 0, "users_with_accounts": 0}

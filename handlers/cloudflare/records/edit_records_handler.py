@@ -8,5 +8,7 @@ edit_handler = EditRecordsHandler()
 
 # Handler exports
 edit_records_handlers = [
-    CallbackQueryHandler(edit_handler.handle_operation, pattern=f"^{CallbackData.EDIT_RECORDS}$"),
+    CallbackQueryHandler(
+        edit_handler.handle_operation, pattern=f"^{CallbackData.EDIT_RECORDS}$"
+    ),
 ]
