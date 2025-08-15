@@ -18,6 +18,10 @@ def register_all_handlers(application: Application) -> None:
         # Register command handlers
         application.add_handler(start_command_handler)
 
+        # Register Cloudflare account addition conversation handler FIRST
+        # to ensure it takes priority over the generic menu callback handler
+        application.add_handler(add_cloudflare_conversation)
+
         # Register menu handlers (command  callback handlers)
         for handler in menu_handlers:
             application.add_handler(handler)
@@ -33,9 +37,6 @@ def register_all_handlers(application: Application) -> None:
 
         for handler in remove_records_handlers:
             application.add_handler(handler)
-
-        # Register Cloudflare account addition conversation handler
-        application.add_handler(add_cloudflare_conversation)
 
         logger.info("All handlers registered successfully")
 

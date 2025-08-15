@@ -36,7 +36,6 @@ class AddCloudflareHandler:
     def __init__(self):
         self.user_data: Dict[int, Dict[str, Any]] = {}
 
-    @require_user_registration
     @handle_errors
     async def start_add_account(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
@@ -318,7 +317,7 @@ add_cloudflare_handler = AddCloudflareHandler()
 add_cloudflare_conversation = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(
-            add_cloudflare_handler.start_add_account, pattern="^add_cloudflare"
+            add_cloudflare_handler.start_add_account, pattern="^add_cloudflare$"
         )
     ],
     states={
