@@ -31,9 +31,9 @@ server {
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
     
     # Telegram Bot Webhook
-    location /YOUR_BOT_TOKEN {
+    location /wangshu {
         # Forward to your bot application
-        proxy_pass http://127.0.0.1:8000/YOUR_BOT_TOKEN;
+        proxy_pass http://127.0.0.1:8000/wangshu;
         
         # Proxy headers
         proxy_set_header Host $host;
@@ -85,7 +85,7 @@ http {
     server {
         # ... server configuration ...
         
-        location /YOUR_BOT_TOKEN {
+        location /wangshu {
             limit_req zone=telegram_webhook burst=20 nodelay;
             # ... rest of location configuration ...
         }

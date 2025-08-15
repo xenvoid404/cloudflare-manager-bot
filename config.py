@@ -18,7 +18,7 @@ class Config:
     
     # --- Webhook Configuration ---
     WEBHOOK_URL: str = os.getenv("WEBHOOK_URL", "")
-    WEBHOOK_PATH: str = os.getenv("WEBHOOK_PATH", BOT_TOKEN)
+    WEBHOOK_PATH: str = os.getenv("WEBHOOK_PATH", "wangshu")  # Changed default to wangshu
     WEBHOOK_SECRET_TOKEN: str = os.getenv("WEBHOOK_SECRET_TOKEN", "your_secret_token_here")
     
     # Validate webhook URL for production

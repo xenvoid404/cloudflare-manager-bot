@@ -47,7 +47,7 @@ Edit file `.env` dan isi dengan konfigurasi Anda:
 ```env
 BOT_TOKEN=your_bot_token_from_botfather
 WEBHOOK_URL=https://your-domain.com
-WEBHOOK_PATH=your_bot_token_here
+WEBHOOK_PATH=wangshu
 WEBHOOK_SECRET_TOKEN=your_secret_token_here
 ```
 
@@ -80,7 +80,6 @@ Edit konfigurasi dan ganti:
 - `your-domain.com` dengan domain Anda
 - `/path/to/your/ssl/certificate.pem` dengan path SSL certificate
 - `/path/to/your/ssl/private.key` dengan path SSL private key
-- `YOUR_BOT_TOKEN` dengan token bot Anda
 
 #### 2. Test dan Reload Nginx
 
@@ -125,7 +124,7 @@ cloudflare-dns-bot/
 |----------|-----------|---------|
 | `BOT_TOKEN` | Token bot dari BotFather | **Required** |
 | `WEBHOOK_URL` | URL webhook (kosongkan untuk polling) | - |
-| `WEBHOOK_PATH` | Path webhook | `BOT_TOKEN` |
+| `WEBHOOK_PATH` | Path webhook | `wangshu` |
 | `WEBHOOK_SECRET_TOKEN` | Secret token untuk webhook | `your_secret_token_here` |
 | `LISTEN_IP` | IP address untuk bind server | `127.0.0.1` |
 | `PORT` | Port untuk server | `8000` |
